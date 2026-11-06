@@ -1,0 +1,2393 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>SANDY — Cyberpunk GIS & Medical Informatics Portfolio</title>
+    <meta name="description" content="SANDY — Portofolio Mahasiswa Sistem Informasi USTI FTI, Konsultan IT & Pengembang Aplikasi, Spesialis Geospasial GIS, dan Medical Informatics.">
+    <meta name="theme-color" content="#030712">
+    <meta property="og:title" content="SANDY — Cyberpunk GIS & Medical Informatics Portfolio">
+    <meta property="og:description" content="Portofolio resmi Sandy: Arsitek Sistem Informasi, Konsultan IT, dan Surveyor Pemetaan GIS.">
+    <meta property="og:type" content="website">
+
+    <!-- Cyberpunk SVG Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23060b18' stroke='%2300ff66' stroke-width='2'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='13' font-weight='bold' fill='%2300ff66' text-anchor='middle'%3E%26gt;S_%3C/text%3E%3C/svg%3E">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Orbitron:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Three.js CDN for True WebGL 3D Hologram -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            black: '#030712',
+                            darker: '#060b18',
+                            surface: '#0b1329',
+                            card: 'rgba(11, 19, 41, 0.75)',
+                            green: '#00ff66',
+                            cyan: '#00f0ff',
+                            purple: '#b026ff',
+                            pink: '#ff007f',
+                            border: 'rgba(0, 240, 255, 0.2)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"Fira Code"', 'monospace'],
+                        orbitron: ['"Orbitron"', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2.5s ease-in-out infinite',
+                        'radar-sweep': 'radarSweep 4s linear infinite',
+                        'circuit-flow': 'circuitFlow 3s linear infinite',
+                        'float': 'floatAnim 5s ease-in-out infinite',
+                        'hologram-flicker': 'hologramFlicker 0.15s infinite alternate',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.4', filter: 'drop-shadow(0 0 15px rgba(0, 255, 102, 0.6))' },
+                            '50%': { opacity: '1', filter: 'drop-shadow(0 0 30px rgba(0, 240, 255, 0.9))' },
+                        },
+                        radarSweep: {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' },
+                        },
+                        circuitFlow: {
+                            '0%': { backgroundPosition: '0% 0%' },
+                            '100%': { backgroundPosition: '0% 200%' },
+                        },
+                        floatAnim: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        },
+                        hologramFlicker: {
+                            '0%': { opacity: '0.97' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --neon-green: #00ff66;
+            --neon-cyan: #00f0ff;
+            --neon-purple: #b026ff;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background-color: #030712;
+            color-scheme: dark;
+        }
+
+        /* Scanlines Overlay */
+        .scanlines {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        /* Sci-Fi Topographic Grid Background */
+        .cyber-grid {
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+            background-size: 48px 48px, 48px 48px, 48px 48px;
+        }
+
+        /* 3D Tilt Card Container & Layered Glare */
+        .tilt-card {
+            transform-style: preserve-3d;
+            perspective: 1200px;
+            transition: transform 0.18s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 3D Depth Layering (Desktop Only to prevent mobile clipping) */
+        @media (min-width: 768px) and (hover: hover) {
+            .depth-layer-1 { transform: translateZ(14px); }
+            .depth-layer-2 { transform: translateZ(24px); }
+            .depth-layer-3 { transform: translateZ(34px); }
+        }
+        @media (max-width: 767px), (hover: none) {
+            .tilt-card {
+                transform: none !important;
+                perspective: none !important;
+            }
+            .depth-layer-1, .depth-layer-2, .depth-layer-3 {
+                transform: none !important;
+            }
+        }
+
+        /* Dynamic Glare Foil Effect on Cards */
+        .glare-foil {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15), transparent 70%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            mix-blend-mode: overlay;
+        }
+        .tilt-card:hover .glare-foil {
+            opacity: 1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00ff66, #00f0ff, #b026ff);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            box-shadow: 0 0 15px #00f0ff;
+        }
+
+        /* Glowing Neon Text Helpers */
+        .glow-text-green {
+            text-shadow: 0 0 12px rgba(0, 255, 102, 0.7), 0 0 25px rgba(0, 255, 102, 0.3);
+        }
+        .glow-text-cyan {
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.7), 0 0 25px rgba(0, 240, 255, 0.3);
+        }
+        .glow-text-purple {
+            text-shadow: 0 0 12px rgba(176, 38, 255, 0.7), 0 0 25px rgba(176, 38, 255, 0.3);
+        }
+        .glow-text-pink {
+            text-shadow: 0 0 12px rgba(255, 0, 127, 0.7), 0 0 25px rgba(255, 0, 127, 0.3);
+        }
+
+        /* Flowing Circuit Line Animation */
+        .circuit-line {
+            background: linear-gradient(180deg, 
+                rgba(0, 255, 102, 0.2) 0%, 
+                rgba(0, 255, 102, 1) 25%, 
+                rgba(0, 240, 255, 1) 50%, 
+                rgba(176, 38, 255, 1) 75%, 
+                rgba(176, 38, 255, 0.2) 100%
+            );
+            background-size: 100% 200%;
+            animation: circuitFlow 3s linear infinite;
+        }
+
+        /* Holographic Corner Tech Brackets */
+        .hud-corner-tl {
+            position: absolute; top: -1px; left: -1px; width: 14px; height: 14px;
+            border-top: 2px solid var(--neon-cyan); border-left: 2px solid var(--neon-cyan);
+            pointer-events: none;
+        }
+        .hud-corner-tr {
+            position: absolute; top: -1px; right: -1px; width: 14px; height: 14px;
+            border-top: 2px solid var(--neon-green); border-right: 2px solid var(--neon-green);
+            pointer-events: none;
+        }
+        .hud-corner-bl {
+            position: absolute; bottom: -1px; left: -1px; width: 14px; height: 14px;
+            border-bottom: 2px solid var(--neon-purple); border-left: 2px solid var(--neon-purple);
+            pointer-events: none;
+        }
+        .hud-corner-br {
+            position: absolute; bottom: -1px; right: -1px; width: 14px; height: 14px;
+            border-bottom: 2px solid var(--neon-cyan); border-right: 2px solid var(--neon-cyan);
+            pointer-events: none;
+        }
+
+        /* ==================== MULTI-PAGE SPA SYSTEM ==================== */
+        .page-section {
+            display: none !important;
+            opacity: 0;
+            transform: translateY(18px) scale(0.99);
+            width: 100%;
+            min-height: calc(100vh - 5rem);
+            position: relative;
+        }
+
+        .page-section.page-active {
+            display: flex !important;
+            flex-direction: column;
+            animation: pageFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes pageFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(18px) scale(0.99);
+                filter: blur(4px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0px);
+            }
+        }
+
+        .page-section.page-exit {
+            animation: pageFadeOut 0.18s ease-in forwards;
+        }
+
+        @keyframes pageFadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+        }
+
+        /* Section Pulse Highlight when navigated from Navbar */
+        .section-focus-pulse {
+            animation: cyberSectionPulse 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes cyberSectionPulse {
+            0% {
+                box-shadow: inset 0 0 60px rgba(0, 240, 255, 0.3);
+            }
+            100% {
+                box-shadow: inset 0 0 0px transparent;
+            }
+        }
+
+        /* Consistent Staggered Element Reveal Inside Every Section */
+        .cyber-reveal {
+            opacity: 0;
+            transform: translateY(22px) scale(0.985);
+            filter: blur(3px);
+            transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                        filter 0.45s ease;
+        }
+        .cyber-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0px);
+        }
+
+        /* Holographic Scan Beam Overlay on Page Transition */
+        #page-transition-fx {
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        #page-transition-fx.active {
+            opacity: 1;
+        }
+        @keyframes scanBeamSweep {
+            0% { transform: translateY(-100%); opacity: 0.9; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+        .scan-beam-active {
+            animation: scanBeamSweep 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Active Navbar Item Styling */
+        .nav-link-btn {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-link-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff66, #00f0ff);
+            box-shadow: 0 0 12px #00f0ff;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(-50%);
+        }
+        .nav-link-btn.nav-active {
+            color: #ffffff !important;
+            background: rgba(0, 240, 255, 0.1);
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+        }
+        .nav-link-btn.nav-active::after {
+            width: 80%;
+        }
+
+        /* Mobile Bottom Nav Active State */
+        .mobile-dock-btn.nav-active {
+            color: #00f0ff;
+            background: rgba(0, 240, 255, 0.12);
+            border-color: rgba(0, 240, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+    </style>
+</head>
+<body class="view-mode-home text-slate-300 font-sans antialiased relative selection:bg-cyber-cyan selection:text-black overflow-x-hidden">
+
+    <!-- 1. Interactive & Adaptive Background Particles Canvas -->
+    <canvas id="adaptive-particle-canvas" class="fixed inset-0 w-full h-full z-0 pointer-events-none"></canvas>
+
+    <!-- 2. CRT Scanline Subtle Overlay -->
+    <div class="fixed inset-0 scanlines z-10 pointer-events-none opacity-40"></div>
+
+    <!-- 3. Sci-Fi Cyber Grid -->
+    <div class="fixed inset-0 cyber-grid z-0 pointer-events-none opacity-80"></div>
+
+    <!-- 3.5 Holographic Page Transition Sweep Overlay -->
+    <div id="page-transition-fx" class="fixed inset-0 z-40 pointer-events-none overflow-hidden">
+        <div class="absolute inset-0 bg-cyber-cyan/5 backdrop-blur-[2px]"></div>
+        <div id="transition-scan-beam" class="w-full h-24 bg-gradient-to-b from-transparent via-cyber-cyan/25 to-cyber-green/40 border-b-2 border-cyber-cyan shadow-[0_0_35px_#00f0ff]"></div>
+    </div>
+
+    <!-- 4. Global Audio HUD & Interactive Sound Synthesizer Indicator -->
+    <div class="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-50 flex items-center gap-3">
+        <button id="audio-toggle-btn" class="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full bg-cyber-darker/90 border border-cyber-cyan/40 backdrop-blur-xl text-cyber-cyan text-[11px] sm:text-xs font-mono flex items-center gap-2 hover:border-cyber-cyan hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] transition-all">
+            <span id="audio-icon" class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyber-cyan opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-cyber-cyan"></span>
+            </span>
+            <span id="audio-label">AUDIO FX: ON</span>
+        </button>
+    </div>
+
+    <!-- ==================== HEADER / HUD NAVBAR ==================== -->
+    <header class="fixed top-0 left-0 w-full z-50 backdrop-blur-xl bg-cyber-darker/85 border-b border-cyber-border transition-all duration-300">
+        <!-- Top Transition Progress Laser Line -->
+        <div class="w-full h-[2px] bg-slate-900 overflow-hidden">
+            <div id="nav-progress-bar" class="h-full w-1/5 bg-gradient-to-r from-cyber-green via-cyber-cyan to-cyber-purple shadow-[0_0_12px_#00f0ff] transition-all duration-500 ease-out"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+            
+            <!-- Brand / Call Sign -->
+            <a href="#hero" data-page="hero" class="nav-trigger flex items-center gap-2.5 sm:gap-3 group focus:outline-none min-w-0">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-lg bg-cyber-surface border-2 border-cyber-green/60 flex items-center justify-center relative overflow-hidden group-hover:border-cyber-cyan group-hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] transition-all duration-300">
+                    <span class="text-cyber-green font-mono font-bold text-base sm:text-lg group-hover:text-cyber-cyan transition-colors">&gt;S_</span>
+                    <span class="absolute bottom-0 left-0 w-full h-[2px] bg-cyber-green group-hover:bg-cyber-cyan"></span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-white group-hover:text-cyber-cyan transition-colors">
+                            SANDY
+                        </span>
+                        <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse shrink-0"></span>
+                        <span id="current-page-hud" class="hidden sm:inline-block px-1.5 py-0.5 rounded bg-cyber-cyan/10 border border-cyber-cyan/30 font-mono text-[9px] text-cyber-cyan">
+                            PAGE 01/05
+                        </span>
+                    </div>
+                    <span id="gps-coords" class="font-mono text-[9px] sm:text-[10px] text-cyber-cyan/80 tracking-tight truncate">
+                        LAT: -6.2088° S | LON: 106.8456° E
+                    </span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-1.5 lg:gap-3 font-mono text-xs tracking-wider">
+                <a href="#hero" data-page="hero" class="nav-trigger nav-link-btn nav-active px-3 py-2 rounded-lg border border-transparent text-slate-300 hover:text-cyber-green transition-all flex items-center gap-1.5">
+                    <span class="text-cyber-green font-bold">[01]</span> //HOME
+                </a>
+                <a href="#skills" data-page="skills" class="nav-trigger nav-link-btn px-3 py-2 rounded-lg border border-transparent text-slate-300 hover:text-cyber-cyan transition-all flex items-center gap-1.5">
+                    <span class="text-cyber-cyan font-bold">[02]</span> //KEAHLIAN
+                </a>
+                <a href="#experience" data-page="experience" class="nav-trigger nav-link-btn px-3 py-2 rounded-lg border border-transparent text-slate-300 hover:text-cyber-purple transition-all flex items-center gap-1.5">
+                    <span class="text-cyber-purple font-bold">[03]</span> //TIMELINE
+                </a>
+                <a href="#terminal" data-page="terminal" class="nav-trigger nav-link-btn px-3 py-2 rounded-lg border border-transparent text-slate-300 hover:text-cyber-pink transition-all flex items-center gap-1.5">
+                    <span class="text-cyber-pink font-bold">[04]</span> //TERMINAL
+                </a>
+                <a href="#contact" data-page="contact" class="nav-trigger nav-link-btn px-3 py-2 rounded-lg border border-transparent text-slate-300 hover:text-cyber-green transition-all flex items-center gap-1.5">
+                    <span class="text-cyber-green font-bold">[05]</span> //KONTAK
+                </a>
+            </nav>
+
+            <!-- Social & Telemetry Desktop HUD -->
+            <div class="hidden xl:flex items-center gap-3">
+                <div class="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-cyber-surface/90 border border-slate-800 font-mono text-[11px]">
+                    <div class="flex items-center gap-1.5 text-cyber-cyan">
+                        <span class="w-2 h-2 rounded-full bg-cyber-cyan animate-ping"></span>
+                        <span id="heart-rate-val">74 BPM</span>
+                    </div>
+                    <span class="text-slate-700">|</span>
+                    <span class="text-cyber-purple">GIS: 3D QGIS</span>
+                    <span class="text-slate-700">|</span>
+                    <span class="text-cyber-green">SYS: ONLINE</span>
+                </div>
+
+                <!-- Quick Social Header Icons -->
+                <div class="flex items-center gap-2">
+                    <a href="https://github.com/SandyGimbal" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-cyber-surface border border-slate-800 hover:border-cyber-green flex items-center justify-center text-slate-300 hover:text-cyber-green transition-all shadow-sm" title="GitHub SandyGimbal" onclick="playBeep(840, 0.04)">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                        </svg>
+                    </a>
+                    <a href="https://www.linkedin.com/in/sandy-gimbal-23434219b" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-cyber-surface border border-slate-800 hover:border-cyber-cyan flex items-center justify-center text-slate-300 hover:text-cyber-cyan transition-all shadow-sm" title="LinkedIn Sandy" onclick="playBeep(840, 0.04)">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Right Controls: Page Badge + Hamburger Button -->
+            <div class="flex md:hidden items-center gap-2 shrink-0">
+                <span id="mobile-page-badge" class="px-2 py-1 rounded bg-cyber-cyan/10 border border-cyber-cyan/30 font-mono text-[10px] text-cyber-cyan font-bold">
+                    01/05
+                </span>
+                <button id="mobile-menu-btn" class="p-2 rounded-lg bg-cyber-surface border border-cyber-border text-slate-300 hover:text-cyber-cyan focus:outline-none" aria-label="Toggle Navigation">
+                    <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden bg-cyber-darker/98 border-b border-cyber-border px-5 py-5 font-mono text-xs sm:text-sm space-y-2.5 backdrop-blur-2xl max-h-[80vh] overflow-y-auto">
+            <div class="text-[11px] text-cyber-cyan pb-2 border-b border-slate-800 flex items-center justify-between">
+                <span>NAVIGATION PROTOCOL // MULTI-PAGE</span>
+                <span class="text-cyber-green">READY</span>
+            </div>
+            <a href="#hero" data-page="hero" class="nav-trigger mobile-drawer-link block px-3 py-2.5 rounded-lg border border-transparent text-slate-200 hover:text-cyber-green hover:bg-cyber-green/10 transition-all">// 01. HOME (OVERVIEW)</a>
+            <a href="#skills" data-page="skills" class="nav-trigger mobile-drawer-link block px-3 py-2.5 rounded-lg border border-transparent text-slate-200 hover:text-cyber-cyan hover:bg-cyber-cyan/10 transition-all">// 02. KEAHLIAN (SKILLS 3D)</a>
+            <a href="#experience" data-page="experience" class="nav-trigger mobile-drawer-link block px-3 py-2.5 rounded-lg border border-transparent text-slate-200 hover:text-cyber-purple hover:bg-cyber-purple/10 transition-all">// 03. PENGALAMAN &amp; PROYEK NYATA</a>
+            <a href="#terminal" data-page="terminal" class="nav-trigger mobile-drawer-link block px-3 py-2.5 rounded-lg border border-transparent text-slate-200 hover:text-cyber-pink hover:bg-cyber-pink/10 transition-all">// 04. CYBER TERMINAL CLI</a>
+            <a href="#contact" data-page="contact" class="nav-trigger mobile-drawer-link block px-3 py-2.5 rounded-lg border border-transparent text-slate-200 hover:text-cyber-green hover:bg-cyber-green/10 transition-all">// 05. KONTAK TRANSMISSION</a>
+            
+            <!-- Mobile Social Links -->
+            <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-800/80 font-mono text-xs">
+                <a href="https://github.com/SandyGimbal" target="_blank" rel="noopener noreferrer" class="p-2.5 rounded bg-slate-900 border border-slate-800 text-cyber-green flex items-center justify-center gap-1.5 hover:border-cyber-green">
+                    <span>GITHUB</span>
+                </a>
+                <a href="https://www.linkedin.com/in/sandy-gimbal-23434219b" target="_blank" rel="noopener noreferrer" class="p-2.5 rounded bg-slate-900 border border-slate-800 text-cyber-cyan flex items-center justify-center gap-1.5 hover:border-cyber-cyan">
+                    <span>LINKEDIN</span>
+                </a>
+            </div>
+
+            <div class="pt-2 text-[11px] text-slate-400 flex items-center justify-between">
+                <span>STATUS: OPERATIONAL</span>
+                <span class="text-cyber-green">USTI FTI 2026</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Bottom Quick-Navigation Bar (Always accessible on Mobile) -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-cyber-darker/95 backdrop-blur-2xl border-t border-cyber-border px-2 py-1.5">
+        <div class="grid grid-cols-5 gap-1 font-mono text-[9px] text-center">
+            <button type="button" data-page="hero" class="nav-trigger mobile-dock-btn nav-active py-1.5 px-1 rounded-lg border border-transparent text-slate-400 flex flex-col items-center justify-center gap-0.5 transition-all">
+                <span class="text-cyber-green font-bold">[01]</span>
+                <span class="truncate w-full">HOME</span>
+            </button>
+            <button type="button" data-page="skills" class="nav-trigger mobile-dock-btn py-1.5 px-1 rounded-lg border border-transparent text-slate-400 flex flex-col items-center justify-center gap-0.5 transition-all">
+                <span class="text-cyber-cyan font-bold">[02]</span>
+                <span class="truncate w-full">KEAHLIAN</span>
+            </button>
+            <button type="button" data-page="experience" class="nav-trigger mobile-dock-btn py-1.5 px-1 rounded-lg border border-transparent text-slate-400 flex flex-col items-center justify-center gap-0.5 transition-all">
+                <span class="text-cyber-purple font-bold">[03]</span>
+                <span class="truncate w-full">PROYEK</span>
+            </button>
+            <button type="button" data-page="terminal" class="nav-trigger mobile-dock-btn py-1.5 px-1 rounded-lg border border-transparent text-slate-400 flex flex-col items-center justify-center gap-0.5 transition-all">
+                <span class="text-cyber-pink font-bold">[04]</span>
+                <span class="truncate w-full">TERMINAL</span>
+            </button>
+            <button type="button" data-page="contact" class="nav-trigger mobile-dock-btn py-1.5 px-1 rounded-lg border border-transparent text-slate-400 flex flex-col items-center justify-center gap-0.5 transition-all">
+                <span class="text-cyber-green font-bold">[05]</span>
+                <span class="truncate w-full">KONTAK</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="relative z-20">
+
+        <!-- ==================== 1. HERO SECTION (PAGE 01: HOME) ==================== -->
+        <section id="hero" data-page-index="0" class="page-section page-active min-h-screen pt-24 sm:pt-28 pb-28 md:pb-16 flex items-center justify-center relative px-4 sm:px-6 lg:px-8">
+            
+            <!-- Neon Ambient Radial Auras -->
+            <div class="absolute top-1/4 left-5 w-72 sm:w-96 h-72 sm:h-96 bg-cyber-green/15 rounded-full blur-[140px] pointer-events-none"></div>
+            <div class="absolute top-1/3 right-5 sm:right-10 w-72 sm:w-96 h-72 sm:h-96 bg-cyber-cyan/15 rounded-full blur-[150px] pointer-events-none"></div>
+            <div class="absolute bottom-10 left-1/3 w-64 sm:w-80 h-64 sm:h-80 bg-cyber-purple/15 rounded-full blur-[130px] pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto w-full space-y-10">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+                    
+                    <!-- Left Column: Intro Data & Decrypted Text -->
+                    <div class="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left cyber-reveal">
+                        
+                        <!-- Top Security Pill -->
+                        <div class="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full border border-cyber-cyan/40 bg-cyber-cyan/10 backdrop-blur-md max-w-full">
+                            <span class="w-2 h-2 rounded-full bg-cyber-cyan animate-ping shrink-0"></span>
+                            <span class="font-mono text-[10px] sm:text-xs text-cyber-cyan font-semibold tracking-wider truncate">
+                                SEC_AUTH // MEDICAL_INFORMATICS &amp; SPATIAL_GIS
+                            </span>
+                        </div>
+
+                        <!-- Main Name & Scramble Decrypt Animation -->
+                        <div class="space-y-2">
+                            <p class="font-mono text-cyber-green text-xs sm:text-sm tracking-widest uppercase glow-text-green font-semibold">
+                                &gt; INISIALISASI ARSITEK SISTEM:
+                            </p>
+                            <h1 class="text-4xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white font-orbitron">
+                                <span class="scramble-text" data-original="SANDY">SANDY</span>
+                            </h1>
+                        </div>
+
+                        <!-- Tagline with Glowing Highlighters -->
+                        <div class="font-mono text-xs sm:text-base lg:text-lg text-cyber-cyan font-medium flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                            <span class="px-2.5 py-0.5 rounded bg-cyber-cyan/10 border border-cyber-cyan/30 text-white font-semibold">Information Systems Student</span>
+                            <span class="text-slate-600 hidden sm:inline">/</span>
+                            <span class="px-2 py-0.5 sm:p-0 text-cyber-green">IT Consultant</span>
+                            <span class="text-slate-600 hidden sm:inline">/</span>
+                            <span class="px-2 py-0.5 sm:p-0 text-cyber-purple glow-text-purple font-semibold">Spatial Data Enthusiast</span>
+                        </div>
+
+                        <!-- Deskripsi Singkat -->
+                        <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto lg:mx-0 font-sans">
+                            Mahasiswa Sistem Informasi Fakultas Teknik dan Informatika <span class="text-white font-semibold underline decoration-cyber-cyan underline-offset-4">Universitas Sains dan Teknologi Indonesia</span>. Menggabungkan ketangguhan arsitektur teknologi informasi, analisis informatika medis, dan pemodelan pemetaan spasial untuk menghadirkan solusi komputasi presisi tinggi.
+                        </p>
+
+                        <!-- Realtime Medical Informatics ECG Waveform Canvas -->
+                        <div class="p-3.5 sm:p-4 rounded-xl bg-cyber-surface/80 border border-cyber-cyan/30 backdrop-blur-xl space-y-2.5 shadow-[0_0_30px_rgba(0,240,255,0.1)]">
+                            <div class="flex flex-wrap items-center justify-between gap-2 text-[10px] sm:text-xs font-mono">
+                                <span class="text-slate-400 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-cyber-cyan animate-pulse shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                    </svg>
+                                    LIVE MEDICAL TELEMETRY (ECG)
+                                </span>
+                                <span class="text-cyber-green font-bold flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-cyber-green animate-ping"></span>
+                                    VITAL: STABIL (SpO2 99%)
+                                </span>
+                            </div>
+                            
+                            <!-- Smooth Animated ECG Canvas -->
+                            <canvas id="ecg-canvas" class="w-full h-12 rounded bg-slate-950/80 border border-slate-800/80"></canvas>
+                            
+                            <div class="grid grid-cols-3 gap-1 sm:gap-2 font-mono text-[9px] sm:text-[10px] text-slate-400 pt-1 text-center">
+                                <div class="border-r border-slate-800 pr-1"><span class="text-slate-500 block truncate">CARDIAC FREQ</span> <span id="pulse-display" class="text-cyber-cyan font-bold">74 BPM</span></div>
+                                <div class="border-r border-slate-800 px-1"><span class="text-slate-500 block truncate">GIS ACCURACY</span> <span class="text-cyber-purple font-bold">0.5m LiDAR</span></div>
+                                <div class="pl-1"><span class="text-slate-500 block truncate">SECURITY</span> <span class="text-cyber-green font-bold">TLS 1.3</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 3D Glowing Action Buttons -->
+                        <div class="pt-2 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center lg:justify-start gap-3 sm:gap-4">
+                            <!-- Masuk ke Halaman Keahlian -->
+                            <a href="#skills" data-page="skills" class="nav-trigger group relative px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl font-mono text-xs sm:text-sm font-bold tracking-widest uppercase overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(0,255,102,0.4)] hover:shadow-[0_0_45px_rgba(0,255,102,0.7)] text-center">
+                                <span class="absolute inset-0 bg-gradient-to-r from-cyber-green via-teal-400 to-cyber-cyan opacity-95 group-hover:opacity-100 transition-opacity"></span>
+                                <span class="relative text-black flex items-center justify-center gap-2">
+                                    <span>Eksplorasi Keahlian</span>
+                                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                    </svg>
+                                </span>
+                            </a>
+
+                            <!-- Lihat Proyek & Pengalaman -->
+                            <a href="#experience" data-page="experience" class="nav-trigger group relative px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl font-mono text-xs sm:text-sm font-bold tracking-widest uppercase border-2 border-cyber-purple/60 hover:border-cyber-purple bg-cyber-surface/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_0_30px_rgba(176,38,255,0.4)] text-center">
+                                <span class="relative text-cyber-purple flex items-center justify-center gap-2 group-hover:text-white transition-colors">
+                                    <span class="w-2 h-2 rounded-full bg-cyber-purple animate-ping"></span>
+                                    Lihat Proyek &amp; Pengalaman
+                                </span>
+                            </a>
+
+                            <!-- Hubungi Saya -->
+                            <a href="#contact" data-page="contact" class="nav-trigger group relative px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl font-mono text-xs sm:text-sm font-bold tracking-widest uppercase border-2 border-cyber-cyan/50 hover:border-cyber-cyan bg-cyber-surface/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_0_30px_rgba(0,240,255,0.4)] text-center">
+                                <span class="relative text-cyber-cyan flex items-center justify-center gap-2 group-hover:text-white transition-colors">
+                                    <span class="w-2 h-2 rounded-full bg-cyber-cyan animate-ping"></span>
+                                    Hubungi Saya
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Interactive 3D WebGL Hologram Globe Viewport -->
+                    <div class="lg:col-span-5 flex justify-center cyber-reveal">
+                        <div class="w-full max-w-md rounded-2xl p-4 sm:p-6 bg-cyber-card border border-cyber-cyan/40 shadow-[0_0_50px_rgba(0,240,255,0.2)] backdrop-blur-2xl relative group">
+                            
+                            <!-- Tech HUD Corners -->
+                            <div class="hud-corner-tl"></div>
+                            <div class="hud-corner-tr"></div>
+                            <div class="hud-corner-bl"></div>
+                            <div class="hud-corner-br"></div>
+
+                            <!-- Header HUD Info -->
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-800 text-xs font-mono">
+                                <div class="flex items-center gap-2 text-cyber-cyan">
+                                    <span class="w-2 h-2 rounded-full bg-cyber-green animate-ping"></span>
+                                    <span>3D_SPATIAL_SPHERE.obj</span>
+                                </div>
+                                <span class="text-slate-500 text-[10px]">WEBGL ROTATE: ACTIVE</span>
+                            </div>
+
+                            <!-- 3D Interactive Canvas Area -->
+                            <div class="relative w-full h-64 sm:h-80 lg:h-96 my-2 flex items-center justify-center overflow-hidden rounded-xl bg-slate-950/70 border border-slate-900 cursor-grab active:cursor-grabbing" id="globe-container">
+                                <!-- Overlay Instructions -->
+                                <div class="absolute top-3 left-3 z-20 pointer-events-none">
+                                    <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-cyber-cyan/30 text-cyber-cyan font-mono text-[9px] sm:text-[10px]">
+                                        ROTASI &amp; DRAG MOUSE / SENTUH
+                                    </span>
+                                </div>
+
+                                <!-- Sonar Radar Scanning Ring -->
+                                <div class="absolute w-48 h-48 sm:w-64 sm:h-64 rounded-full border border-cyber-cyan/20 pointer-events-none animate-ping opacity-25"></div>
+                                <div class="absolute w-36 h-36 sm:w-48 sm:h-48 rounded-full border border-cyber-green/20 pointer-events-none animate-pulse"></div>
+
+                                <!-- Real Three.js Canvas will be inserted here -->
+                                <canvas id="three-globe-canvas" class="w-full h-full"></canvas>
+                            </div>
+
+                            <!-- Bottom Telemetry Badges -->
+                            <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-[10px] sm:text-xs font-mono text-slate-400">
+                                <span class="text-cyber-green">PROYEKSI: WGS84</span>
+                                <span class="text-cyber-purple">DATUM: INDONESIA_GEO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ==================== BERANDA HUB: SYSTEM OVERVIEW / GATEWAY TO ALL PAGES ==================== -->
+                <div class="space-y-6 pt-6 sm:pt-10 cyber-reveal">
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-800 pb-3">
+                        <div>
+                            <div class="font-mono text-[10px] sm:text-xs text-cyber-cyan tracking-widest uppercase">
+                                // SYSTEM DIRECTORY &amp; OVERVIEW
+                            </div>
+                            <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white font-orbitron">
+                                JELAJAHI <span class="text-cyber-green glow-text-green">SELURUH HALAMAN</span>
+                            </h3>
+                        </div>
+                        <p class="text-slate-400 text-xs font-mono">
+                            Klik modul di bawah untuk masuk langsung ke halaman spesifik
+                        </p>
+                    </div>
+
+                    <!-- 4 Gateway Cards to Dedicated Pages -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        
+                        <!-- CARD 1: Keahlian -->
+                        <div class="p-4 sm:p-5 rounded-2xl bg-cyber-card border border-cyber-cyan/30 hover:border-cyber-cyan backdrop-blur-xl transition-all hover:scale-[1.02] flex flex-col justify-between group shadow-sm hover:shadow-[0_0_25px_rgba(0,240,255,0.2)]">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between text-xs font-mono">
+                                    <span class="text-cyber-cyan font-bold">[02] //HALAMAN</span>
+                                    <span class="w-2 h-2 rounded-full bg-cyber-cyan animate-pulse"></span>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-bold text-white font-orbitron group-hover:text-cyber-cyan transition-colors">
+                                    Keahlian &amp; Tools
+                                </h4>
+                                <p class="text-slate-400 text-xs leading-relaxed">
+                                    Pengembangan Web &amp; Mobile (Laravel, Android), Pemetaan GIS (QGIS, ArcGIS Pro), Telemetri Medis.
+                                </p>
+                            </div>
+                            <div class="pt-4">
+                                <button type="button" data-page="skills" class="nav-trigger w-full py-2.5 px-3 rounded-xl bg-cyber-cyan/10 border border-cyber-cyan/40 hover:bg-cyber-cyan/25 text-cyber-cyan text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all">
+                                    <span>Masuk Keahlian</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CARD 2: Proyek & Pengalaman -->
+                        <div class="p-4 sm:p-5 rounded-2xl bg-cyber-card border border-cyber-purple/30 hover:border-cyber-purple backdrop-blur-xl transition-all hover:scale-[1.02] flex flex-col justify-between group shadow-sm hover:shadow-[0_0_25px_rgba(176,38,255,0.2)]">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between text-xs font-mono">
+                                    <span class="text-cyber-purple font-bold">[03] //HALAMAN</span>
+                                    <span class="w-2 h-2 rounded-full bg-cyber-purple animate-pulse"></span>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-bold text-white font-orbitron group-hover:text-cyber-purple transition-colors">
+                                    Proyek Nyata
+                                </h4>
+                                <p class="text-slate-400 text-xs leading-relaxed">
+                                    Freelance IT Consultant, Surveyor Pemetaan Partisipatif Desa, dan Kepengurusan Wanapalhi.
+                                </p>
+                            </div>
+                            <div class="pt-4">
+                                <button type="button" data-page="experience" class="nav-trigger w-full py-2.5 px-3 rounded-xl bg-cyber-purple/10 border border-cyber-purple/40 hover:bg-cyber-purple/25 text-cyber-purple text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all">
+                                    <span>Masuk Proyek</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CARD 3: Terminal CLI -->
+                        <div class="p-4 sm:p-5 rounded-2xl bg-cyber-card border border-cyber-pink/30 hover:border-cyber-pink backdrop-blur-xl transition-all hover:scale-[1.02] flex flex-col justify-between group shadow-sm hover:shadow-[0_0_25px_rgba(255,0,127,0.2)]">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between text-xs font-mono">
+                                    <span class="text-cyber-pink font-bold">[04] //HALAMAN</span>
+                                    <span class="w-2 h-2 rounded-full bg-cyber-pink animate-pulse"></span>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-bold text-white font-orbitron group-hover:text-cyber-pink transition-colors">
+                                    Cyber Terminal
+                                </h4>
+                                <p class="text-slate-400 text-xs leading-relaxed">
+                                    Konsol baris perintah interaktif (CLI) untuk eksplorasi data, telemetri satelit GIS, dan diagnosa sistem.
+                                </p>
+                            </div>
+                            <div class="pt-4">
+                                <button type="button" data-page="terminal" class="nav-trigger w-full py-2.5 px-3 rounded-xl bg-cyber-pink/10 border border-cyber-pink/40 hover:bg-cyber-pink/25 text-cyber-pink text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all">
+                                    <span>Buka Terminal</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CARD 4: Kontak & Saluran -->
+                        <div class="p-4 sm:p-5 rounded-2xl bg-cyber-card border border-cyber-green/30 hover:border-cyber-green backdrop-blur-xl transition-all hover:scale-[1.02] flex flex-col justify-between group shadow-sm hover:shadow-[0_0_25px_rgba(0,255,102,0.2)]">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between text-xs font-mono">
+                                    <span class="text-cyber-green font-bold">[05] //HALAMAN</span>
+                                    <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></span>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-bold text-white font-orbitron group-hover:text-cyber-green transition-colors">
+                                    Transmisi Kontak
+                                </h4>
+                                <p class="text-slate-400 text-xs leading-relaxed">
+                                    Koneksi langsung melalui Email resmi (1-klik salin), profil GitHub, LinkedIn, dan kolaborasi sistem.
+                                </p>
+                            </div>
+                            <div class="pt-4">
+                                <button type="button" data-page="contact" class="nav-trigger w-full py-2.5 px-3 rounded-xl bg-cyber-green/10 border border-cyber-green/40 hover:bg-cyber-green/25 text-cyber-green text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all">
+                                    <span>Buka Kontak</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Bottom HUD Page Stepper (Home -> Keahlian) -->
+                <div class="single-page-stepper pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs cyber-reveal">
+                    <div class="text-slate-400 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyber-green"></span>
+                        <span>HALAMAN AKTIF: <strong class="text-white">[01] //HOME</strong></span>
+                    </div>
+                    <button type="button" data-page="skills" class="nav-trigger w-full sm:w-auto px-5 py-3 rounded-xl bg-cyber-surface border border-cyber-cyan/50 hover:border-cyber-cyan text-cyber-cyan hover:bg-cyber-cyan/10 flex items-center justify-center gap-3 transition-all shadow-[0_0_20px_rgba(0,240,255,0.15)] group">
+                        <span>MASUK KE HALAMAN: <strong>[02] //KEAHLIAN</strong></span>
+                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================== 2. KEAHLIAN (PAGE 02: SKILLS SECTION - FULL 3D TILT) ==================== -->
+        <section id="skills" data-page-index="1" class="page-section min-h-screen pt-24 sm:pt-28 pb-28 md:pb-20 relative px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto w-full space-y-10 sm:space-y-14">
+                
+                <!-- Section Header -->
+                <div class="text-center space-y-3 cyber-reveal">
+                    <div class="inline-flex items-center gap-2 font-mono text-xs text-cyber-green tracking-widest uppercase px-3 py-1 rounded-full bg-cyber-green/10 border border-cyber-green/30">
+                        <span class="text-cyber-cyan">// 02.</span> MATRIX KEAHLIAN KOMPREHENSIF
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-orbitron">
+                        KOMPETENSI &amp; <span class="text-cyber-cyan glow-text-cyan scramble-text" data-original="ARSITEKTUR">ARSITEKTUR</span>
+                    </h2>
+                    <p class="text-slate-400 max-w-xl mx-auto text-xs sm:text-base">
+                        Kombinasi kemampuan rekayasa perangkat lunak modern, sistem informasi geografis berskala spasial, dan kepemimpinan tim.
+                    </p>
+                </div>
+
+                <!-- 3D Floating Skill Cards with Parallax Glare -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    
+                    <!-- CARD 1: IT & Development (Cyber Green Theme) -->
+                    <div class="tilt-card cyber-reveal rounded-2xl p-5 sm:p-7 lg:p-8 bg-cyber-card border border-cyber-green/40 backdrop-blur-2xl hover:border-cyber-green hover:shadow-[0_0_45px_rgba(0,255,102,0.3)] transition-all">
+                        <div class="glare-foil"></div>
+                        <div class="hud-corner-tl"></div>
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="hud-corner-br"></div>
+
+                        <div class="depth-layer-1 space-y-5 sm:space-y-6">
+                            <!-- Card Header -->
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-cyber-green/10 border border-cyber-green/50 flex items-center justify-center text-cyber-green shadow-[0_0_20px_rgba(0,255,102,0.2)] shrink-0">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                    </svg>
+                                </div>
+                                <span class="font-mono text-[11px] sm:text-xs text-cyber-green px-3 py-1 rounded-full bg-cyber-green/10 border border-cyber-green/40 font-semibold">
+                                    SYS.DEV // 01
+                                </span>
+                            </div>
+
+                            <div class="depth-layer-2">
+                                <h3 class="text-xl sm:text-2xl font-bold text-white font-orbitron group-hover:text-cyber-green transition-colors">
+                                    IT &amp; Development
+                                </h3>
+                                <p class="text-slate-400 text-xs mt-1.5 leading-relaxed">
+                                    Perancangan arsitektur sistem, aplikasi web/mobile skalabel, serta optimasi basis data terpadu.
+                                </p>
+                            </div>
+
+                            <!-- Skills List -->
+                            <div class="depth-layer-3 space-y-2.5 sm:space-y-3 font-mono text-[11px] sm:text-xs">
+                                
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-cyber-green/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-cyber-green shrink-0"></span>
+                                        <span class="truncate">HTML5 &amp; Modern Semantic</span>
+                                    </span>
+                                    <span class="text-cyber-green font-bold shrink-0">100%</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-cyber-cyan/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-cyber-cyan shrink-0"></span>
+                                        <span class="truncate">Tailwind CSS (3D UI)</span>
+                                    </span>
+                                    <span class="text-cyber-cyan font-bold shrink-0">Pro</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-red-400/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-red-400 shrink-0"></span>
+                                        <span class="truncate">Laravel Framework</span>
+                                    </span>
+                                    <span class="text-red-400 font-bold shrink-0">MVC / REST</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-emerald-400/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+                                        <span class="truncate">Android Studio</span>
+                                    </span>
+                                    <span class="text-emerald-400 font-bold shrink-0">Mobile Native</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-blue-400/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-blue-400 shrink-0"></span>
+                                        <span class="truncate">MySQL Database</span>
+                                    </span>
+                                    <span class="text-blue-400 font-bold shrink-0">Relational</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- CARD 2: Spatial & Mapping (Neon Purple Theme) -->
+                    <div class="tilt-card cyber-reveal rounded-2xl p-5 sm:p-7 lg:p-8 bg-cyber-card border border-cyber-purple/40 backdrop-blur-2xl hover:border-cyber-purple hover:shadow-[0_0_45px_rgba(176,38,255,0.3)] transition-all">
+                        <div class="glare-foil"></div>
+                        <div class="hud-corner-tl"></div>
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="hud-corner-br"></div>
+
+                        <div class="depth-layer-1 space-y-5 sm:space-y-6">
+                            <!-- Card Header -->
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-cyber-purple/10 border border-cyber-purple/50 flex items-center justify-center text-cyber-purple shadow-[0_0_20px_rgba(176,38,255,0.2)] shrink-0">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                                <span class="font-mono text-[11px] sm:text-xs text-cyber-purple px-3 py-1 rounded-full bg-cyber-purple/10 border border-cyber-purple/40 font-semibold">
+                                    GIS.SPATIAL // 02
+                                </span>
+                            </div>
+
+                            <div class="depth-layer-2">
+                                <h3 class="text-xl sm:text-2xl font-bold text-white font-orbitron group-hover:text-cyber-purple transition-colors">
+                                    Spatial &amp; Mapping
+                                </h3>
+                                <p class="text-slate-400 text-xs mt-1.5 leading-relaxed">
+                                    Pemetaan digital partisipatif, analisis raster &amp; vektor geospasial, kartografi berstandar nasional.
+                                </p>
+                            </div>
+
+                            <!-- Skills List -->
+                            <div class="depth-layer-3 space-y-2.5 sm:space-y-3 font-mono text-[11px] sm:text-xs">
+                                
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-cyber-purple/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-cyber-purple shrink-0"></span>
+                                        <span class="truncate">Arc GIS Pro</span>
+                                    </span>
+                                    <span class="text-cyber-purple font-bold shrink-0">Spatial Analyst</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-amber-400/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+                                        <span class="truncate">QGIS Desktop</span>
+                                    </span>
+                                    <span class="text-amber-400 font-bold shrink-0">Open GIS</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-cyber-cyan/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-cyber-cyan shrink-0"></span>
+                                        <span class="truncate">Data Spasial &amp; GeoJSON</span>
+                                    </span>
+                                    <span class="text-cyber-cyan font-bold shrink-0">Attribute Data</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-emerald-400/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+                                        <span class="truncate">Pemetaan Partisipatif</span>
+                                    </span>
+                                    <span class="text-emerald-400 font-bold shrink-0">Field Survey</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-blue-300/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-blue-300 shrink-0"></span>
+                                        <span class="truncate">Topografi &amp; DEM</span>
+                                    </span>
+                                    <span class="text-blue-300 font-bold shrink-0">Elevation Models</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- CARD 3: Soft Skills (Neon Cyan Theme) -->
+                    <div class="tilt-card cyber-reveal md:col-span-2 lg:col-span-1 rounded-2xl p-5 sm:p-7 lg:p-8 bg-cyber-card border border-cyber-cyan/40 backdrop-blur-2xl hover:border-cyber-cyan hover:shadow-[0_0_45px_rgba(0,240,255,0.3)] transition-all">
+                        <div class="glare-foil"></div>
+                        <div class="hud-corner-tl"></div>
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="hud-corner-br"></div>
+
+                        <div class="depth-layer-1 space-y-5 sm:space-y-6">
+                            <!-- Card Header -->
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-cyber-cyan/10 border border-cyber-cyan/50 flex items-center justify-center text-cyber-cyan shadow-[0_0_20px_rgba(0,240,255,0.2)] shrink-0">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                    </svg>
+                                </div>
+                                <span class="font-mono text-[11px] sm:text-xs text-cyber-cyan px-3 py-1 rounded-full bg-cyber-cyan/10 border border-cyber-cyan/40 font-semibold">
+                                    HUMAN.LEAD // 03
+                                </span>
+                            </div>
+
+                            <div class="depth-layer-2">
+                                <h3 class="text-xl sm:text-2xl font-bold text-white font-orbitron group-hover:text-cyber-cyan transition-colors">
+                                    Soft Skills &amp; Leadership
+                                </h3>
+                                <p class="text-slate-400 text-xs mt-1.5 leading-relaxed">
+                                    Kepemimpinan adaptif, penyelesaian problem kompleks secara terukur, dan tata kelola anggaran.
+                                </p>
+                            </div>
+
+                            <!-- Skills List -->
+                            <div class="depth-layer-3 space-y-2.5 sm:space-y-3 font-mono text-[11px] sm:text-xs">
+                                
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-cyber-cyan/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-cyber-cyan shrink-0"></span>
+                                        <span class="truncate">Leadership &amp; Direction</span>
+                                    </span>
+                                    <span class="text-cyber-cyan font-bold shrink-0">High Impact</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-cyber-green/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-cyber-green shrink-0"></span>
+                                        <span class="truncate">Problem Solving</span>
+                                    </span>
+                                    <span class="text-cyber-green font-bold shrink-0">Root Cause</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-cyber-purple/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-cyber-purple shrink-0"></span>
+                                        <span class="truncate">Manajemen Organisasi</span>
+                                    </span>
+                                    <span class="text-cyber-purple font-bold shrink-0">Governance</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-yellow-400/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-yellow-400 shrink-0"></span>
+                                        <span class="truncate">Fasilitasi Edukasi Warga</span>
+                                    </span>
+                                    <span class="text-yellow-400 font-bold shrink-0">Pedagogy</span>
+                                </div>
+
+                                <div class="p-2.5 sm:p-3 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 hover:border-pink-400/50 transition-colors">
+                                    <span class="text-slate-200 flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-pink-400 shrink-0"></span>
+                                        <span class="truncate">Akuntabilitas Bendahara</span>
+                                    </span>
+                                    <span class="text-pink-400 font-bold shrink-0">Finance Control</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bottom HUD Page Stepper (Home <- Keahlian -> Pengalaman) -->
+                <div class="single-page-stepper pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs cyber-reveal">
+                    <button type="button" data-page="hero" class="nav-trigger w-full sm:w-auto px-5 py-3 rounded-xl bg-cyber-surface border border-slate-700 hover:border-cyber-green text-slate-300 hover:text-cyber-green flex items-center justify-center gap-2.5 transition-all group">
+                        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+                        </svg>
+                        <span>KEMBALI KE: <strong>[01] //BERANDA</strong></span>
+                    </button>
+                    <button type="button" data-page="experience" class="nav-trigger w-full sm:w-auto px-5 py-3 rounded-xl bg-cyber-surface border border-cyber-purple/60 hover:border-cyber-purple text-cyber-purple hover:bg-cyber-purple/10 flex items-center justify-center gap-2.5 transition-all shadow-[0_0_20px_rgba(176,38,255,0.15)] group">
+                        <span>HALAMAN BERIKUTNYA: <strong>[03] //PENGALAMAN &amp; PROYEK</strong></span>
+                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ==================== 3. PENGALAMAN & PROYEK NYATA (PAGE 03: NEON CIRCUIT TIMELINE) ==================== -->
+        <section id="experience" data-page-index="2" class="page-section min-h-screen pt-24 sm:pt-28 pb-28 md:pb-20 relative px-4 sm:px-6 lg:px-8">
+            <div class="max-w-6xl mx-auto w-full space-y-10 sm:space-y-14">
+                
+                <!-- Section Header -->
+                <div class="text-center space-y-3 cyber-reveal">
+                    <div class="inline-flex items-center gap-2 font-mono text-xs text-cyber-purple tracking-widest uppercase px-3 py-1 rounded-full bg-cyber-purple/10 border border-cyber-purple/30">
+                        <span class="text-cyber-green">// 03.</span> REKAM JEJAK &amp; KONTRIBUSI
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-orbitron">
+                        PENGALAMAN &amp; <span class="text-cyber-green glow-text-green scramble-text" data-original="PROYEK NYATA">PROYEK NYATA</span>
+                    </h2>
+                    <p class="text-slate-400 max-w-xl mx-auto text-xs sm:text-base">
+                        Kiprah profesional sebagai konsultan pengembang sistem, surveyor pemetaan lapangan, dan dedikasi kepengurusan organisasi.
+                    </p>
+                </div>
+
+                <!-- Summary Telemetry Strip (Mobile & Desktop Responsive) -->
+                <div class="grid grid-cols-3 gap-2 sm:gap-4 font-mono text-center cyber-reveal">
+                    <div class="p-3 sm:p-4 rounded-xl bg-cyber-surface/80 border border-cyber-green/30 backdrop-blur-xl">
+                        <span class="text-lg sm:text-2xl font-black text-cyber-green font-orbitron block">01 // IT</span>
+                        <span class="text-[10px] sm:text-xs text-slate-400">System &amp; App Dev</span>
+                    </div>
+                    <div class="p-3 sm:p-4 rounded-xl bg-cyber-surface/80 border border-cyber-cyan/30 backdrop-blur-xl">
+                        <span class="text-lg sm:text-2xl font-black text-cyber-cyan font-orbitron block">02 // GIS</span>
+                        <span class="text-[10px] sm:text-xs text-slate-400">Survey &amp; Pemetaan</span>
+                    </div>
+                    <div class="p-3 sm:p-4 rounded-xl bg-cyber-surface/80 border border-cyber-purple/30 backdrop-blur-xl">
+                        <span class="text-lg sm:text-2xl font-black text-cyber-purple font-orbitron block">03 // ORG</span>
+                        <span class="text-[10px] sm:text-xs text-slate-400">Wanapalhi 2021-2025</span>
+                    </div>
+                </div>
+
+                <!-- Circuit Timeline Wrapper (100% Mobile & Desktop Responsive - No Horizontal Overflow!) -->
+                <div class="relative w-full">
+                    
+                    <!-- Vertical Glowing Animated Circuit Line (Left on mobile, Center on desktop) -->
+                    <div class="circuit-line absolute left-3.5 sm:left-4 md:left-1/2 top-4 bottom-4 w-1 -translate-x-1/2 rounded-full shadow-[0_0_20px_rgba(0,240,255,0.7)]"></div>
+
+                    <div class="space-y-8 sm:space-y-12">
+                        
+                        <!-- TIMELINE ITEM 1: Freelance IT Consultant -->
+                        <div class="relative flex flex-col md:flex-row items-start group w-full cyber-reveal">
+                            
+                            <!-- Timeline Circuit Pulsing Node -->
+                            <div class="absolute left-3.5 sm:left-4 md:left-1/2 -translate-x-1/2 top-5 w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-cyber-darker border-2 border-cyber-green flex items-center justify-center z-10 shadow-[0_0_20px_#00ff66] group-hover:scale-125 transition-transform duration-300">
+                                <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-cyber-green animate-ping"></span>
+                            </div>
+
+                            <!-- Content Left Card (Mobile: Full width with left padding; Desktop: Left 50%) -->
+                            <div class="w-full pl-9 sm:pl-12 md:pl-0 md:w-1/2 md:pr-10 lg:pr-14 box-border">
+                                <div class="tilt-card p-4 sm:p-6 lg:p-7 rounded-2xl bg-cyber-card border border-cyber-green/40 backdrop-blur-2xl hover:border-cyber-green transition-all shadow-[0_0_30px_rgba(0,255,102,0.15)]">
+                                    <div class="glare-foil"></div>
+                                    <div class="hud-corner-tl"></div>
+                                    <div class="hud-corner-br"></div>
+
+                                    <div class="depth-layer-1 space-y-3 sm:space-y-3.5">
+                                        <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] sm:text-xs">
+                                            <span class="text-cyber-green px-2.5 py-1 rounded bg-cyber-green/10 border border-cyber-green/40 font-bold">
+                                                2024 — SEKARANG
+                                            </span>
+                                            <span class="text-slate-400">KONTRAK / FREELANCE</span>
+                                        </div>
+
+                                        <h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-white font-orbitron group-hover:text-cyber-green transition-colors leading-snug">
+                                            Freelance IT Consultant &amp; System Developer
+                                        </h3>
+
+                                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                                            Mengembangkan aplikasi web dan mobile kustom, menyusun arsitektur sistem informasi, analisis performa data, serta perancangan database dan antarmuka UI/UX yang modern dan intuitif.
+                                        </p>
+
+                                        <!-- Highlight Tags -->
+                                        <div class="flex flex-wrap gap-1.5 sm:gap-2 pt-1 font-mono text-[10px] sm:text-[11px]">
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-cyber-cyan border border-slate-800">#WebMobileApp</span>
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-cyber-green border border-slate-800">#DataAnalysis</span>
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-cyber-purple border border-slate-800">#DatabaseUIUX</span>
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-pink-400 border border-slate-800">#ClientConsulting</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right spacer for alternating layout -->
+                            <div class="hidden md:block md:w-1/2"></div>
+                        </div>
+
+
+                        <!-- TIMELINE ITEM 2: Surveyor & Fasilitator Pemetaan -->
+                        <div class="relative flex flex-col md:flex-row items-start group w-full cyber-reveal">
+                            
+                            <!-- Timeline Circuit Pulsing Node -->
+                            <div class="absolute left-3.5 sm:left-4 md:left-1/2 -translate-x-1/2 top-5 w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-cyber-darker border-2 border-cyber-cyan flex items-center justify-center z-10 shadow-[0_0_20px_#00f0ff] group-hover:scale-125 transition-transform duration-300">
+                                <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-cyber-cyan animate-ping"></span>
+                            </div>
+
+                            <!-- Left spacer for alternating layout -->
+                            <div class="hidden md:block md:w-1/2"></div>
+
+                            <!-- Content Right Card (Mobile: Full width with left padding; Desktop: Right 50%) -->
+                            <div class="w-full pl-9 sm:pl-12 md:pl-10 lg:pl-14 md:w-1/2 box-border">
+                                <div class="tilt-card p-4 sm:p-6 lg:p-7 rounded-2xl bg-cyber-card border border-cyber-cyan/40 backdrop-blur-2xl hover:border-cyber-cyan transition-all shadow-[0_0_30px_rgba(0,240,255,0.15)]">
+                                    <div class="glare-foil"></div>
+                                    <div class="hud-corner-tr"></div>
+                                    <div class="hud-corner-bl"></div>
+
+                                    <div class="depth-layer-1 space-y-3 sm:space-y-3.5">
+                                        <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] sm:text-xs">
+                                            <span class="text-cyber-cyan px-2.5 py-1 rounded bg-cyber-cyan/10 border border-cyber-cyan/40 font-bold">
+                                                MARET 2023
+                                            </span>
+                                            <span class="text-slate-400">FIELD RESEARCH &amp; SURVEY</span>
+                                        </div>
+
+                                        <h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-white font-orbitron group-hover:text-cyber-cyan transition-colors leading-snug">
+                                            Surveyor &amp; Fasilitator Pemetaan
+                                        </h3>
+
+                                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                                            Memfasilitasi edukasi pemetaan partisipatif masyarakat desa, melakukan pengambilan data titik koordinat lapangan, pengukuran tata batas lahan, serta validasi data spasial berbasis QGIS dan Arc GIS Pro.
+                                        </p>
+
+                                        <!-- Highlight Tags -->
+                                        <div class="flex flex-wrap gap-1.5 sm:gap-2 pt-1 font-mono text-[10px] sm:text-[11px]">
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-cyber-cyan border border-slate-800">#PemetaanPartisipatif</span>
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-cyber-purple border border-slate-800">#QGIS_ArcGISPro</span>
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-cyber-green border border-slate-800">#FieldSurvey</span>
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-amber-400 border border-slate-800">#CommunityEmpowerment</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- TIMELINE ITEM 3: Pengurus Wanapalhi -->
+                        <div class="relative flex flex-col md:flex-row items-start group w-full cyber-reveal">
+                            
+                            <!-- Timeline Circuit Pulsing Node -->
+                            <div class="absolute left-3.5 sm:left-4 md:left-1/2 -translate-x-1/2 top-5 w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-cyber-darker border-2 border-cyber-purple flex items-center justify-center z-10 shadow-[0_0_20px_#b026ff] group-hover:scale-125 transition-transform duration-300">
+                                <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-cyber-purple animate-ping"></span>
+                            </div>
+
+                            <!-- Content Left Card (Mobile: Full width with left padding; Desktop: Left 50%) -->
+                            <div class="w-full pl-9 sm:pl-12 md:pl-0 md:w-1/2 md:pr-10 lg:pr-14 box-border">
+                                <div class="tilt-card p-4 sm:p-6 lg:p-7 rounded-2xl bg-cyber-card border border-cyber-purple/40 backdrop-blur-2xl hover:border-cyber-purple transition-all shadow-[0_0_30px_rgba(176,38,255,0.15)]">
+                                    <div class="glare-foil"></div>
+                                    <div class="hud-corner-tl"></div>
+                                    <div class="hud-corner-br"></div>
+
+                                    <div class="depth-layer-1 space-y-3 sm:space-y-3.5">
+                                        <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] sm:text-xs">
+                                            <span class="text-cyber-purple px-2.5 py-1 rounded bg-cyber-purple/10 border border-cyber-purple/40 font-bold">
+                                                2021 — 2025
+                                            </span>
+                                            <span class="text-slate-400">KEPENGURUSAN INTI</span>
+                                        </div>
+
+                                        <h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-white font-orbitron group-hover:text-cyber-purple transition-colors leading-snug">
+                                            Pengurus Wanapalhi
+                                        </h3>
+
+                                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                                            Menjabat posisi kepemimpinan dan manajemen organisasi yang membutuhkan tanggung jawab tinggi:
+                                        </p>
+
+                                        <div class="space-y-2 pt-1 font-mono text-[11px] sm:text-xs">
+                                            <div class="p-2.5 rounded bg-slate-900/80 border border-slate-800 flex items-start gap-2">
+                                                <span class="text-cyber-green font-bold shrink-0">&gt;</span>
+                                                <div>
+                                                    <span class="text-white font-bold">Koordinator Pelaksana:</span>
+                                                    <span class="text-slate-300"> Hari Lingkungan Hidup (Memimpin eksekusi program lapangan)</span>
+                                                </div>
+                                            </div>
+                                            <div class="p-2.5 rounded bg-slate-900/80 border border-slate-800 flex items-start gap-2">
+                                                <span class="text-cyber-cyan font-bold shrink-0">&gt;</span>
+                                                <div>
+                                                    <span class="text-white font-bold">Kepala Divisi:</span>
+                                                    <span class="text-slate-300"> Rumah Tangga &amp; Manajemen Sarana Prasarana</span>
+                                                </div>
+                                            </div>
+                                            <div class="p-2.5 rounded bg-slate-900/80 border border-slate-800 flex items-start gap-2">
+                                                <span class="text-cyber-purple font-bold shrink-0">&gt;</span>
+                                                <div>
+                                                    <span class="text-white font-bold">Bendahara Umum:</span>
+                                                    <span class="text-slate-300"> Pengelolaan neraca keuangan, budgeting, dan akuntabilitas organisasi</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Highlight Tags -->
+                                        <div class="flex flex-wrap gap-1.5 sm:gap-2 pt-1 font-mono text-[10px] sm:text-[11px]">
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-cyber-purple border border-slate-800">#OrganizationalLeadership</span>
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-cyber-cyan border border-slate-800">#FinanceManagement</span>
+                                            <span class="px-2 sm:px-2.5 py-1 rounded bg-slate-900 text-cyber-green border border-slate-800">#EventCoordinator</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right spacer for alternating layout -->
+                            <div class="hidden md:block md:w-1/2"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Bottom HUD Page Stepper (Keahlian <- Pengalaman -> Terminal) -->
+                <div class="single-page-stepper pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs cyber-reveal">
+                    <button type="button" data-page="skills" class="nav-trigger w-full sm:w-auto px-5 py-3 rounded-xl bg-cyber-surface border border-slate-700 hover:border-cyber-cyan text-slate-300 hover:text-cyber-cyan flex items-center justify-center gap-2.5 transition-all group">
+                        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+                        </svg>
+                        <span>SEBELUMNYA: <strong>[02] //KEAHLIAN</strong></span>
+                    </button>
+                    <button type="button" data-page="terminal" class="nav-trigger w-full sm:w-auto px-5 py-3 rounded-xl bg-cyber-surface border border-cyber-pink/60 hover:border-cyber-pink text-cyber-pink hover:bg-cyber-pink/10 flex items-center justify-center gap-2.5 transition-all shadow-[0_0_20px_rgba(255,0,127,0.15)] group">
+                        <span>HALAMAN BERIKUTNYA: <strong>[04] //TERMINAL</strong></span>
+                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ==================== 4. INTERACTIVE CYBER TERMINAL CLI (PAGE 04) ==================== -->
+        <section id="terminal" data-page-index="3" class="page-section min-h-screen pt-24 sm:pt-28 pb-28 md:pb-20 relative px-4 sm:px-6 lg:px-8">
+            <div class="max-w-4xl mx-auto w-full space-y-8">
+                
+                <div class="text-center space-y-2.5 cyber-reveal">
+                    <div class="inline-flex items-center gap-2 font-mono text-xs text-cyber-pink tracking-widest uppercase px-3 py-1 rounded-full bg-cyber-pink/10 border border-cyber-pink/30">
+                        <span class="text-cyber-cyan">// 04.</span> INTERACTIVE COMMAND LINE
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl font-bold text-white font-orbitron">
+                        CYBER <span class="text-cyber-pink glow-text-pink scramble-text" data-original="TERMINAL">TERMINAL</span>
+                    </h2>
+                    <p class="text-slate-400 text-xs sm:text-sm">
+                        Ketik perintah atau klik tombol cepat di bawah untuk mengeksekusi modul sistem Sandy.
+                    </p>
+                </div>
+
+                <!-- Terminal Container -->
+                <div class="cyber-reveal rounded-2xl bg-cyber-black/95 border border-cyber-border shadow-[0_0_50px_rgba(0,240,255,0.15)] overflow-hidden font-mono text-xs backdrop-blur-2xl">
+                    <!-- Terminal Top Bar -->
+                    <div class="px-3.5 sm:px-4 py-3 bg-cyber-darker border-b border-slate-800 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-3 h-3 rounded-full bg-red-500/80 shrink-0"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500/80 shrink-0"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500/80 shrink-0"></span>
+                            <span class="ml-1.5 text-slate-400 text-[10px] sm:text-[11px] truncate">sandy@usti-system:~</span>
+                        </div>
+                        <span class="text-cyber-green text-[9px] sm:text-[10px] shrink-0">SESSION: ENCRYPTED</span>
+                    </div>
+
+                    <!-- Terminal Output Area -->
+                    <div id="terminal-output" class="p-4 sm:p-5 space-y-2 h-64 sm:h-72 overflow-y-auto text-slate-300 text-[11px] sm:text-xs">
+                        <div class="text-cyber-cyan">&gt; Selamat datang di Konsol Portofolio Sandy [Versi 3.8-PRO].</div>
+                        <div class="text-slate-400">&gt; Ketik <span class="text-cyber-green">'help'</span> untuk melihat daftar perintah yang tersedia.</div>
+                    </div>
+
+                    <!-- Command Quick Chips -->
+                    <div class="px-3.5 sm:px-4 py-2.5 bg-slate-950/80 border-t border-slate-800 flex flex-wrap gap-1.5 sm:gap-2 text-[10px] sm:text-[11px]">
+                        <span class="text-slate-500 self-center">PILIH CEPAT:</span>
+                        <button type="button" onclick="runCommand('bio')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-cyber-cyan hover:border-cyber-cyan transition-colors">bio</button>
+                        <button type="button" onclick="runCommand('skills')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-cyber-green hover:border-cyber-green transition-colors">skills</button>
+                        <button type="button" onclick="runCommand('exp')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-cyber-purple hover:border-cyber-purple transition-colors">exp</button>
+                        <button type="button" onclick="runCommand('contact')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-pink-400 hover:border-pink-400 transition-colors">contact</button>
+                        <button type="button" onclick="runCommand('sat')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-amber-400 hover:border-amber-400 transition-colors">sat</button>
+                        <button type="button" onclick="runCommand('clear')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors">clear</button>
+                    </div>
+
+                    <!-- Terminal Prompt Input -->
+                    <form id="terminal-form" class="px-3.5 sm:px-4 py-3 bg-cyber-darker border-t border-slate-800 flex items-center gap-2">
+                        <span class="text-cyber-green font-bold shrink-0 text-[11px] sm:text-xs">sandy@cli:~$</span>
+                        <input id="terminal-input" type="text" placeholder="Ketik perintah (help, bio, skills)..." autocomplete="off" class="flex-1 min-w-0 bg-transparent text-white focus:outline-none text-xs font-mono">
+                        <button type="submit" class="px-3 py-1.5 rounded bg-cyber-green text-black font-bold text-xs hover:shadow-[0_0_15px_#00ff66] transition-all shrink-0">ENTER</button>
+                    </form>
+                </div>
+
+                <!-- Bottom HUD Page Stepper (Pengalaman <- Terminal -> Kontak) -->
+                <div class="single-page-stepper pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs cyber-reveal">
+                    <button type="button" data-page="experience" class="nav-trigger w-full sm:w-auto px-5 py-3 rounded-xl bg-cyber-surface border border-slate-700 hover:border-cyber-purple text-slate-300 hover:text-cyber-purple flex items-center justify-center gap-2.5 transition-all group">
+                        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+                        </svg>
+                        <span>SEBELUMNYA: <strong>[03] //TIMELINE</strong></span>
+                    </button>
+                    <button type="button" data-page="contact" class="nav-trigger w-full sm:w-auto px-5 py-3 rounded-xl bg-cyber-surface border border-cyber-green/60 hover:border-cyber-green text-cyber-green hover:bg-cyber-green/10 flex items-center justify-center gap-2.5 transition-all shadow-[0_0_20px_rgba(0,255,102,0.15)] group">
+                        <span>HALAMAN BERIKUTNYA: <strong>[05] //KONTAK</strong></span>
+                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ==================== 5. KONTAK & FOOTER (PAGE 05) ==================== -->
+        <section id="contact" data-page-index="4" class="page-section min-h-screen pt-24 sm:pt-28 pb-28 md:pb-20 relative px-4 sm:px-6 lg:px-8">
+            <!-- Glow Accent -->
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-72 sm:w-96 h-72 sm:h-96 bg-cyber-cyan/15 rounded-full blur-[160px] pointer-events-none"></div>
+
+            <div class="max-w-4xl mx-auto w-full space-y-10 sm:space-y-12">
+                
+                <!-- Terminal Header -->
+                <div class="text-center space-y-3 cyber-reveal">
+                    <div class="inline-flex items-center gap-2 font-mono text-xs text-cyber-green tracking-widest uppercase px-3 py-1 rounded-full bg-cyber-green/10 border border-cyber-green/30">
+                        <span class="text-cyber-cyan">// 05.</span> TRANSMISSION PROTOCOL
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-orbitron">
+                        MEMULAI <span class="text-cyber-cyan glow-text-cyan scramble-text" data-original="KOLABORASI">KOLABORASI</span>
+                    </h2>
+                    <p class="text-slate-400 max-w-lg mx-auto text-xs sm:text-base">
+                        Terbuka untuk konsultasi sistem informasi, riset pemetaan spasial terapan, serta inovasi digital informatika medis.
+                    </p>
+                </div>
+
+                <!-- 3D Glassmorphism Contact Transmission Box -->
+                <div class="tilt-card cyber-reveal rounded-2xl bg-cyber-card border border-cyber-cyan/40 backdrop-blur-2xl p-5 sm:p-8 lg:p-10 shadow-[0_0_60px_rgba(0,240,255,0.2)] relative">
+                    <div class="glare-foil"></div>
+                    <div class="hud-corner-tl"></div>
+                    <div class="hud-corner-tr"></div>
+                    <div class="hud-corner-bl"></div>
+                    <div class="hud-corner-br"></div>
+
+                    <div class="depth-layer-1 space-y-6 sm:space-y-8">
+                        
+                        <!-- Terminal Bar -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-800 text-[10px] sm:text-xs font-mono">
+                            <span class="text-cyber-green flex items-center gap-2 font-semibold">
+                                <span class="w-2.5 h-2.5 rounded-full bg-cyber-green animate-ping shrink-0"></span>
+                                COMM_LINK: SALURAN TERBUKA 24/7
+                            </span>
+                            <span class="text-slate-500">ENCRYPTION: AES-256-GCM</span>
+                        </div>
+
+                        <!-- Email Direct Box with 1-Click Copy -->
+                        <div class="p-4 sm:p-5 rounded-xl bg-slate-950/90 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div class="flex items-center gap-3.5 min-w-0 w-full sm:w-auto">
+                                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-cyber-cyan/10 border border-cyber-cyan/40 flex items-center justify-center text-cyber-cyan shadow-[0_0_20px_rgba(0,240,255,0.2)] shrink-0">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <span class="text-[10px] font-mono text-slate-500 block uppercase">Saluran Email Utama</span>
+                                    <span id="email-text" class="text-white font-mono text-sm sm:text-base lg:text-lg font-bold break-all">Brosandy828@gmail.com</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
+                                <button id="copy-email-btn" type="button" onclick="copyEmail()" class="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-lg bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan/40 text-cyber-cyan font-mono text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span id="copy-label">SALIN EMAIL</span>
+                                </button>
+                                <a href="mailto:Brosandy828@gmail.com" class="flex-1 sm:flex-none text-center px-4 sm:px-5 py-2.5 rounded-lg bg-cyber-green text-black font-mono text-xs font-extrabold hover:shadow-[0_0_20px_#00ff66] transition-all" onclick="playBeep(980, 0.08)">
+                                    KIRIM EMAIL
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Social Media External Cards (GitHub & LinkedIn) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            
+                            <!-- GitHub Profile -->
+                            <a href="https://github.com/SandyGimbal" target="_blank" rel="noopener noreferrer" class="p-4 sm:p-5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-cyber-green/60 hover:bg-slate-900 transition-all flex items-center justify-between group" onclick="playBeep(840, 0.05)">
+                                <div class="flex items-center gap-3.5 min-w-0">
+                                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/5 flex items-center justify-center text-white group-hover:text-cyber-green transition-colors shrink-0">
+                                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <span class="text-white font-bold text-sm block group-hover:text-cyber-green transition-colors">GitHub Repository</span>
+                                        <span class="text-slate-500 font-mono text-xs truncate block">github.com/SandyGimbal</span>
+                                    </div>
+                                </div>
+                                <svg class="w-5 h-5 text-slate-600 group-hover:text-cyber-green group-hover:translate-x-1.5 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </a>
+
+                            <!-- LinkedIn Profile -->
+                            <a href="https://www.linkedin.com/in/sandy-gimbal-23434219b" target="_blank" rel="noopener noreferrer" class="p-4 sm:p-5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-cyber-cyan/60 hover:bg-slate-900 transition-all flex items-center justify-between group" onclick="playBeep(840, 0.05)">
+                                <div class="flex items-center gap-3.5 min-w-0">
+                                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/5 flex items-center justify-center text-white group-hover:text-cyber-cyan transition-colors shrink-0">
+                                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <span class="text-white font-bold text-sm block group-hover:text-cyber-cyan transition-colors">LinkedIn Profile</span>
+                                        <span class="text-slate-500 font-mono text-xs truncate block">linkedin.com/in/sandy-gimbal</span>
+                                    </div>
+                                </div>
+                                <svg class="w-5 h-5 text-slate-600 group-hover:text-cyber-cyan group-hover:translate-x-1.5 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </a>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Bottom HUD Page Stepper (Terminal <- Kontak -> Home) -->
+                <div class="single-page-stepper pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs cyber-reveal">
+                    <button type="button" data-page="terminal" class="nav-trigger w-full sm:w-auto px-5 py-3 rounded-xl bg-cyber-surface border border-slate-700 hover:border-cyber-pink text-slate-300 hover:text-cyber-pink flex items-center justify-center gap-2.5 transition-all group">
+                        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+                        </svg>
+                        <span>SEBELUMNYA: <strong>[04] //TERMINAL</strong></span>
+                    </button>
+                    <button type="button" data-page="hero" class="nav-trigger w-full sm:w-auto px-5 py-3 rounded-xl bg-cyber-surface border border-cyber-green/60 hover:border-cyber-green text-cyber-green hover:bg-cyber-green/10 flex items-center justify-center gap-2.5 transition-all shadow-[0_0_20px_rgba(0,255,102,0.15)] group">
+                        <span>KEMBALI KE: <strong>[01] //BERANDA</strong></span>
+                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Footer Bottom Meta -->
+                <div class="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-slate-500 gap-4 text-center sm:text-left cyber-reveal">
+                    <p>© 2026 Sandy. Arsitektur Terenkripsi &amp; Terdesentralisasi.</p>
+                    <p class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyber-green animate-pulse shrink-0"></span>
+                        <span>Fakultas Teknik dan Informatika — USTI</span>
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+
+    <!-- ==================== JAVASCRIPT MASTER SUITE ==================== -->
+    <script>
+        /* ------------------------------------------------------------------
+         * 1. Web Audio API Sci-Fi Sound Synthesizer (No external audio files!)
+         * ------------------------------------------------------------------ */
+        let audioCtx = null;
+        let isAudioEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+        }
+
+        function playBeep(freq = 600, duration = 0.05, type = 'sine') {
+            if (!isAudioEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (err) {
+                // Ignore audio restriction gracefully
+            }
+        }
+
+        const audioToggleBtn = document.getElementById('audio-toggle-btn');
+        const audioLabel = document.getElementById('audio-label');
+        const audioIcon = document.getElementById('audio-icon');
+
+        audioToggleBtn.addEventListener('click', () => {
+            isAudioEnabled = !isAudioEnabled;
+            if (isAudioEnabled) {
+                audioLabel.innerText = 'AUDIO FX: ON';
+                audioToggleBtn.classList.remove('border-slate-700', 'text-slate-500');
+                audioToggleBtn.classList.add('border-cyber-cyan/40', 'text-cyber-cyan');
+                audioIcon.classList.remove('hidden');
+                playBeep(880, 0.08);
+            } else {
+                audioLabel.innerText = 'AUDIO FX: OFF';
+                audioToggleBtn.classList.remove('border-cyber-cyan/40', 'text-cyber-cyan');
+                audioToggleBtn.classList.add('border-slate-700', 'text-slate-500');
+                audioIcon.classList.add('hidden');
+            }
+        });
+
+
+        /* ------------------------------------------------------------------
+         * 2. Live Dynamic Mouse Tracker (GPS HUD Update)
+         * ------------------------------------------------------------------ */
+        const gpsCoordsEl = document.getElementById('gps-coords');
+        window.addEventListener('mousemove', (e) => {
+            const lat = (-6.2088 + (e.clientY / window.innerHeight - 0.5) * 0.01).toFixed(4);
+            const lon = (106.8456 + (e.clientX / window.innerWidth - 0.5) * 0.01).toFixed(4);
+            if (gpsCoordsEl) {
+                gpsCoordsEl.innerText = `LAT: ${lat}° S | LON: ${lon}° E`;
+            }
+        });
+
+
+        /* ------------------------------------------------------------------
+         * 3. Text Scramble Decryption Animation
+         * ------------------------------------------------------------------ */
+        const chars = '!<>-_\\/[]{}—=+*^?#________';
+        function scrambleText(element) {
+            if (!element) return;
+            const originalText = element.getAttribute('data-original') || element.innerText;
+            if (element._scrambleInterval) clearInterval(element._scrambleInterval);
+            let iteration = 0;
+            element._scrambleInterval = setInterval(() => {
+                element.innerText = originalText.split('')
+                    .map((char, index) => {
+                        if (char === ' ') return ' ';
+                        if (index < iteration) return originalText[index];
+                        return chars[Math.floor(Math.random() * chars.length)];
+                    })
+                    .join('');
+
+                if (iteration >= originalText.length) {
+                    clearInterval(element._scrambleInterval);
+                    element.innerText = originalText;
+                }
+                iteration += 1 / 3;
+            }, 28);
+        }
+
+
+        /* ------------------------------------------------------------------
+         * 3.5 Seamless Cyber Navigation, ScrollSpy, Transitions & Animations
+         * ------------------------------------------------------------------ */
+        const pageOrder = ['hero', 'skills', 'experience', 'terminal', 'contact'];
+        let currentPageId = 'hero';
+        let isProgrammaticScroll = false;
+        let scrollTimeout = null;
+
+        function playTransitionSound(isForward = true) {
+            if (!isAudioEnabled) return;
+            playBeep(isForward ? 580 : 740, 0.045, 'sine');
+            setTimeout(() => playBeep(isForward ? 880 : 520, 0.065, 'triangle'), 45);
+        }
+
+        function triggerSectionAnimations(sectionEl) {
+            if (!sectionEl) return;
+
+            // 1. Staggered reveal for all .cyber-reveal items inside the section
+            const revealItems = sectionEl.querySelectorAll('.cyber-reveal');
+            revealItems.forEach((el, idx) => {
+                setTimeout(() => {
+                    el.classList.add('revealed');
+                }, 40 + idx * 70);
+            });
+
+            // 2. Decrypt scramble text titles inside the active section
+            sectionEl.querySelectorAll('.scramble-text').forEach((el) => {
+                scrambleText(el);
+            });
+        }
+
+        function updateNavigationUI(targetPageId) {
+            const pageIdx = pageOrder.indexOf(targetPageId);
+            if (pageIdx === -1) return;
+            const pageNumStr = String(pageIdx + 1).padStart(2, '0');
+
+            // Top laser progress bar
+            const progressBar = document.getElementById('nav-progress-bar');
+            if (progressBar) {
+                progressBar.style.width = `${((pageIdx + 1) / pageOrder.length) * 100}%`;
+            }
+
+            // Header HUD badges
+            const currentHud = document.getElementById('current-page-hud');
+            if (currentHud) {
+                currentHud.innerText = `PAGE ${pageNumStr}/05`;
+            }
+            const mobileBadge = document.getElementById('mobile-page-badge');
+            if (mobileBadge) {
+                mobileBadge.innerText = `${pageNumStr}/05`;
+            }
+
+            // Desktop Nav Links
+            document.querySelectorAll('.nav-link-btn').forEach((btn) => {
+                if (btn.getAttribute('data-page') === targetPageId) {
+                    btn.classList.add('nav-active');
+                } else {
+                    btn.classList.remove('nav-active');
+                }
+            });
+
+            // Mobile Drawer Links
+            document.querySelectorAll('.mobile-drawer-link').forEach((link) => {
+                if (link.getAttribute('data-page') === targetPageId) {
+                    link.classList.add('bg-cyber-cyan/15', 'border-cyber-cyan/40', 'text-cyber-cyan', 'font-bold');
+                } else {
+                    link.classList.remove('bg-cyber-cyan/15', 'border-cyber-cyan/40', 'text-cyber-cyan', 'font-bold');
+                }
+            });
+
+            // Mobile Bottom Dock Buttons
+            document.querySelectorAll('.mobile-dock-btn').forEach((btn) => {
+                if (btn.getAttribute('data-page') === targetPageId) {
+                    btn.classList.add('nav-active');
+                } else {
+                    btn.classList.remove('nav-active');
+                }
+            });
+        }
+
+        function navigateToPage(targetPageId, updateHistory = true) {
+            if (!pageOrder.includes(targetPageId)) return;
+
+            // Close mobile drawer if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu) mobileMenu.classList.add('hidden');
+
+            const currentSection = document.getElementById(currentPageId);
+            const targetSection = document.getElementById(targetPageId);
+            if (!targetSection) return;
+
+            // If already on this page and visible, scroll to top
+            if (targetPageId === currentPageId && targetSection.classList.contains('page-active')) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            const currentIdx = pageOrder.indexOf(currentPageId);
+            const targetIdx = pageOrder.indexOf(targetPageId);
+            const isForward = targetIdx >= currentIdx;
+
+            // 1. Play Sci-Fi Transition Sound & Update Navbar UI immediately
+            playTransitionSound(isForward);
+            updateNavigationUI(targetPageId);
+
+            // 2. Trigger Holographic Scan Beam Overlay
+            const transitionFx = document.getElementById('page-transition-fx');
+            const scanBeam = document.getElementById('transition-scan-beam');
+            if (transitionFx && scanBeam) {
+                transitionFx.classList.add('active');
+                scanBeam.classList.remove('scan-beam-active');
+                void scanBeam.offsetWidth; // Reflow
+                scanBeam.classList.add('scan-beam-active');
+                setTimeout(() => {
+                    transitionFx.classList.remove('active');
+                }, 550);
+            }
+
+            // 3. Page exit animation on old section
+            if (currentSection && currentSection !== targetSection) {
+                currentSection.classList.add('page-exit');
+            }
+
+            // 4. Switch to new page at the beam sweep peak (140ms)
+            setTimeout(() => {
+                pageOrder.forEach((id) => {
+                    const sec = document.getElementById(id);
+                    if (sec) {
+                        if (id === targetPageId) {
+                            sec.classList.remove('page-exit');
+                            sec.classList.add('page-active');
+                        } else {
+                            sec.classList.remove('page-active', 'page-exit');
+                        }
+                    }
+                });
+
+                // Instantly scroll window to top for the new page
+                window.scrollTo({ top: 0, behavior: 'instant' });
+
+                currentPageId = targetPageId;
+
+                // Pulse highlight & trigger section animations
+                targetSection.classList.remove('section-focus-pulse');
+                void targetSection.offsetWidth;
+                targetSection.classList.add('section-focus-pulse');
+                triggerSectionAnimations(targetSection);
+
+                // Resize Three.js globe if entering hero
+                if (targetPageId === 'hero') {
+                    window.dispatchEvent(new Event('resize'));
+                }
+
+                // Focus terminal input on desktop when entering Terminal
+                if (targetPageId === 'terminal' && window.innerWidth >= 768) {
+                    const termInput = document.getElementById('terminal-input');
+                    if (termInput) setTimeout(() => termInput.focus(), 300);
+                }
+            }, 140);
+
+            if (updateHistory && history.pushState) {
+                history.pushState({ page: targetPageId }, '', `#${targetPageId}`);
+            }
+        }
+
+        // Bind all .nav-trigger elements (Navbar, Mobile Drawer, Mobile Dock, Hero CTA, Bottom Steppers, Hub Cards)
+        document.querySelectorAll('.nav-trigger').forEach((trigger) => {
+            trigger.addEventListener('click', (e) => {
+                const targetPage = trigger.getAttribute('data-page');
+                if (targetPage) {
+                    e.preventDefault();
+                    navigateToPage(targetPage);
+                }
+            });
+        });
+
+        // Handle browser Back / Forward buttons
+        window.addEventListener('popstate', () => {
+            const hashPage = window.location.hash.replace('#', '');
+            if (pageOrder.includes(hashPage)) {
+                navigateToPage(hashPage, false);
+            } else {
+                navigateToPage('hero', false);
+            }
+        });
+
+        // Initial Page Load Setup & Animation Trigger
+        window.addEventListener('DOMContentLoaded', () => {
+            const initialHash = window.location.hash.replace('#', '');
+            const startPage = pageOrder.includes(initialHash) ? initialHash : 'hero';
+
+            currentPageId = startPage;
+
+            pageOrder.forEach((id) => {
+                const sec = document.getElementById(id);
+                if (sec) {
+                    if (id === startPage) {
+                        sec.classList.add('page-active');
+                    } else {
+                        sec.classList.remove('page-active', 'page-exit');
+                    }
+                }
+            });
+
+            updateNavigationUI(startPage);
+
+            const activeSection = document.getElementById(startPage);
+            if (activeSection) {
+                triggerSectionAnimations(activeSection);
+            }
+
+            // Reveal observer for all .cyber-reveal elements to guarantee instant reveal when visible
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                    }
+                });
+            }, { root: null, rootMargin: '0px 0px -30px 0px', threshold: 0.05 });
+
+            document.querySelectorAll('.cyber-reveal').forEach((el) => {
+                revealObserver.observe(el);
+            });
+        });
+
+
+        /* ------------------------------------------------------------------
+         * 4. Three.js: True 3D Holographic Spatial Globe & Orbiting GIS Nodes
+         * ------------------------------------------------------------------ */
+        (function initThreeGlobe() {
+            const container = document.getElementById('globe-container');
+            const canvas = document.getElementById('three-globe-canvas');
+            if (!container || !canvas || typeof THREE === 'undefined') return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, (container.clientWidth || 320) / (container.clientHeight || 320), 0.1, 1000);
+            camera.position.z = 2.8;
+
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth || 320, container.clientHeight || 320);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Wireframe Hologram Globe
+            const globeGeo = new THREE.SphereGeometry(1, 28, 28);
+            const globeMat = new THREE.MeshBasicMaterial({
+                color: 0x00f0ff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.35
+            });
+            const globe = new THREE.Mesh(globeGeo, globeMat);
+            scene.add(globe);
+
+            // Inner Core Glow Sphere
+            const innerGeo = new THREE.SphereGeometry(0.96, 16, 16);
+            const innerMat = new THREE.MeshBasicMaterial({
+                color: 0x00ff66,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.12
+            });
+            const innerSphere = new THREE.Mesh(innerGeo, innerMat);
+            globe.add(innerSphere);
+
+            // Orbiting GIS Satellite Ring 1 (Cyan)
+            const ringGeo1 = new THREE.RingGeometry(1.25, 1.28, 64);
+            const ringMat1 = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+            const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+            ring1.rotation.x = Math.PI / 3;
+            scene.add(ring1);
+
+            // Orbiting Ring 2 (Purple)
+            const ringGeo2 = new THREE.RingGeometry(1.4, 1.42, 64);
+            const ringMat2 = new THREE.MeshBasicMaterial({ color: 0xb026ff, side: THREE.DoubleSide, transparent: true, opacity: 0.4 });
+            const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+            ring2.rotation.x = -Math.PI / 4;
+            ring2.rotation.y = Math.PI / 6;
+            scene.add(ring2);
+
+            // GIS Data Node Markers on Globe Surface
+            const nodeGeo = new THREE.SphereGeometry(0.025, 8, 8);
+            const nodeMat = new THREE.MeshBasicMaterial({ color: 0x00ff66 });
+            for (let i = 0; i < 18; i++) {
+                const node = new THREE.Mesh(nodeGeo, nodeMat);
+                const phi = Math.acos(-1 + (2 * i) / 18);
+                const theta = Math.sqrt(18 * Math.PI) * phi;
+                node.position.setFromSphericalCoords(1.02, phi, theta);
+                globe.add(node);
+            }
+
+            // 3D Spatial Constellation Particles around Globe
+            const particleGeo = new THREE.BufferGeometry();
+            const particleCount = 220;
+            const posArray = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                const r = 1.15 + Math.random() * 0.7;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() * 2) - 1);
+                posArray[i] = r * Math.sin(phi) * Math.cos(theta);
+                posArray[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+                posArray[i + 2] = r * Math.cos(phi);
+            }
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particleMat = new THREE.PointsMaterial({
+                size: 0.022,
+                color: 0x00f0ff,
+                transparent: true,
+                opacity: 0.75
+            });
+            const globeParticles = new THREE.Points(particleGeo, particleMat);
+            scene.add(globeParticles);
+
+            // Mouse & Touch Interaction
+            let isDragging = false;
+            let prevMouseX = 0;
+            let prevMouseY = 0;
+            let targetRotationX = 0;
+            let targetRotationY = 0;
+
+            const onPointerDown = (x, y) => {
+                isDragging = true;
+                prevMouseX = x;
+                prevMouseY = y;
+            };
+
+            const onPointerMove = (x, y) => {
+                if (!isDragging) return;
+                const deltaX = x - prevMouseX;
+                const deltaY = y - prevMouseY;
+                targetRotationY += deltaX * 0.008;
+                targetRotationX += deltaY * 0.008;
+                prevMouseX = x;
+                prevMouseY = y;
+            };
+
+            const onPointerUp = () => { isDragging = false; };
+
+            container.addEventListener('mousedown', (e) => onPointerDown(e.clientX, e.clientY));
+            window.addEventListener('mousemove', (e) => onPointerMove(e.clientX, e.clientY));
+            window.addEventListener('mouseup', onPointerUp);
+
+            // Touch support for mobile devices
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+            window.addEventListener('touchmove', (e) => {
+                if (isDragging && e.touches.length === 1) onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+            window.addEventListener('touchend', onPointerUp);
+
+            // Responsive Resize (Guard against 0x0 when section is hidden)
+            window.addEventListener('resize', () => {
+                if (!container) return;
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                if (w === 0 || h === 0) return;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            });
+
+            // Animation Loop (Slow, Professional, Majestic Rotation)
+            function animateGlobe() {
+                requestAnimationFrame(animateGlobe);
+
+                // Auto slow rotation (calm & professional speed)
+                if (!isDragging) {
+                    targetRotationY += 0.0012;
+                }
+
+                // Smooth inertia interpolation
+                globe.rotation.y += (targetRotationY - globe.rotation.y) * 0.06;
+                globe.rotation.x += (targetRotationX - globe.rotation.x) * 0.06;
+
+                // Slow rotation for orbiting rings
+                ring1.rotation.z += 0.0012;
+                ring2.rotation.z -= 0.0009;
+
+                // Counter rotation for spatial particles
+                globeParticles.rotation.y -= 0.0005;
+                globeParticles.rotation.x += 0.0002;
+
+                renderer.render(scene, camera);
+            }
+            animateGlobe();
+        })();
+
+
+        /* ------------------------------------------------------------------
+         * 4.5 Interactive Adaptive Background Particles (Mouse & Screen Reactive)
+         * ------------------------------------------------------------------ */
+        (function initAdaptiveBackgroundParticles() {
+            const canvas = document.getElementById('adaptive-particle-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            const cursor = {
+                x: null,
+                y: null,
+                radius: 160
+            };
+
+            window.addEventListener('mousemove', (e) => {
+                cursor.x = e.clientX;
+                cursor.y = e.clientY;
+            });
+
+            window.addEventListener('mouseleave', () => {
+                cursor.x = null;
+                cursor.y = null;
+            });
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+                createParticles();
+            });
+
+            class AdaptiveParticle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.baseVx = (Math.random() - 0.5) * 0.55;
+                    this.baseVy = (Math.random() - 0.5) * 0.55;
+                    this.vx = this.baseVx;
+                    this.vy = this.baseVy;
+                    this.radius = Math.random() * 2 + 1;
+                    
+                    const colors = [
+                        'rgba(0, 255, 102, 0.75)',  // Hacker Green
+                        'rgba(0, 240, 255, 0.75)',  // Medical Cyan
+                        'rgba(176, 38, 255, 0.75)'  // Spatial Purple
+                    ];
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = this.color;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    // Screen Edge Bounce
+                    if (this.x < 0 || this.x > width) this.vx *= -1;
+                    if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                    // Mouse Adaptive Repulsion & Connection
+                    if (cursor.x !== null && cursor.y !== null) {
+                        const dx = cursor.x - this.x;
+                        const dy = cursor.y - this.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < cursor.radius) {
+                            const force = (cursor.radius - dist) / cursor.radius;
+                            this.x -= (dx / dist) * force * 2.8;
+                            this.y -= (dy / dist) * force * 2.8;
+
+                            // Draw dynamic energy line from particle to cursor
+                            ctx.beginPath();
+                            ctx.moveTo(this.x, this.y);
+                            ctx.lineTo(cursor.x, cursor.y);
+                            ctx.strokeStyle = `rgba(0, 240, 255, ${0.4 * force})`;
+                            ctx.lineWidth = 0.9;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            let particleList = [];
+            function createParticles() {
+                particleList = [];
+                // Adaptive count based on screen area
+                const count = Math.floor((width * height) / 16000);
+                for (let i = 0; i < count; i++) {
+                    particleList.push(new AdaptiveParticle());
+                }
+            }
+            createParticles();
+
+            // Draw Delaunay Triangulation Lines between close particles
+            function connectAdaptiveNodes() {
+                const maxDist = 120;
+                for (let i = 0; i < particleList.length; i++) {
+                    for (let j = i + 1; j < particleList.length; j++) {
+                        const dx = particleList[i].x - particleList[j].x;
+                        const dy = particleList[i].y - particleList[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < maxDist) {
+                            const alpha = (1 - dist / maxDist) * 0.22;
+                            ctx.beginPath();
+                            ctx.moveTo(particleList[i].x, particleList[i].y);
+                            ctx.lineTo(particleList[j].x, particleList[j].y);
+                            ctx.strokeStyle = `rgba(0, 240, 255, ${alpha})`;
+                            ctx.lineWidth = 0.75;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, width, height);
+
+                // Proximity Mesh Lines
+                connectAdaptiveNodes();
+
+                // Update & Render Particles
+                for (let i = 0; i < particleList.length; i++) {
+                    particleList[i].update();
+                    particleList[i].draw();
+                }
+
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+        })();
+
+
+        /* ------------------------------------------------------------------
+         * 5. Realtime Medical Informatics ECG Waveform Simulation
+         * ------------------------------------------------------------------ */
+        (function initECG() {
+            const canvas = document.getElementById('ecg-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function resizeECG() {
+                if (!canvas.parentElement || canvas.parentElement.clientWidth === 0) return;
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = 48;
+            }
+            resizeECG();
+            window.addEventListener('resize', resizeECG);
+
+            let x = 0;
+            let step = 0;
+            const pulseDisplay = document.getElementById('pulse-display');
+            const heartRateNav = document.getElementById('heart-rate-val');
+
+            // Realistic ECG Cycle sequence
+            const ecgPattern = [
+                0, 0, 0, 0, 2, 4, 2, 0, 0, -2, 28, -12, 0, 0, 4, 6, 4, 2, 0, 0
+            ];
+
+            function drawECG() {
+                ctx.fillStyle = 'rgba(3, 7, 18, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const baseline = canvas.height / 2;
+                const patternIndex = step % ecgPattern.length;
+                const amplitude = ecgPattern[patternIndex];
+                const y = baseline - amplitude * 0.8;
+
+                ctx.strokeStyle = '#00f0ff';
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#00f0ff';
+
+                ctx.beginPath();
+                ctx.moveTo(x, baseline);
+                ctx.lineTo(x + 2, y);
+                ctx.stroke();
+
+                x += 2;
+                step++;
+
+                if (x >= canvas.width) {
+                    x = 0;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    // Fluctuate heart rate realistically (72-76 bpm)
+                    const bpm = 72 + Math.floor(Math.random() * 5);
+                    if (pulseDisplay) pulseDisplay.innerText = `${bpm} BPM`;
+                    if (heartRateNav) heartRateNav.innerText = `${bpm} BPM`;
+                }
+
+                requestAnimationFrame(drawECG);
+            }
+            drawECG();
+        })();
+
+
+        /* ------------------------------------------------------------------
+         * 6. Smooth 3D Tilt Effect on Cards (Desktop Hover Only)
+         * ------------------------------------------------------------------ */
+        const tiltCards = document.querySelectorAll('.tilt-card');
+
+        tiltCards.forEach(card => {
+            const glare = card.querySelector('.glare-foil');
+
+            card.addEventListener('mousemove', (e) => {
+                if (window.innerWidth < 768) return;
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.015, 1.015, 1.015)`;
+
+                if (glare) {
+                    const glareX = (x / rect.width) * 100;
+                    const glareY = (y / rect.height) * 100;
+                    glare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.18), transparent 70%)`;
+                }
+            });
+
+            card.addEventListener('mouseleave', () => {
+                if (window.innerWidth < 768) return;
+                card.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            });
+        });
+
+
+        /* ------------------------------------------------------------------
+         * 7. Interactive Cyber Terminal Logic
+         * ------------------------------------------------------------------ */
+        const terminalOutput = document.getElementById('terminal-output');
+        const terminalForm = document.getElementById('terminal-form');
+        const terminalInput = document.getElementById('terminal-input');
+
+        const commands = {
+            help: `Daftar perintah yang tersedia:
+  - <span class="text-cyber-green font-bold">bio</span>: Tampilkan ringkasan profil Sandy
+  - <span class="text-cyber-green font-bold">skills</span>: Tampilkan matrix keahlian IT & GIS
+  - <span class="text-cyber-green font-bold">exp</span>: Tampilkan rekam jejak pengalaman & proyek
+  - <span class="text-cyber-green font-bold">contact</span>: Saluran transmisi email & medsos
+  - <span class="text-cyber-green font-bold">sat</span>: Ping status telemetri satelit GIS
+  - <span class="text-cyber-green font-bold">goto &lt;halaman&gt;</span>: Navigasi cepat (home, skills, exp, contact)
+  - <span class="text-cyber-green font-bold">date / time</span>: Tampilkan waktu sistem
+  - <span class="text-cyber-green font-bold">clear</span>: Bersihkan layar konsol`,
+            
+            bio: `<span class="text-cyber-cyan font-bold">[PROFIL RESMI]</span>
+Nama: Sandy
+Pendidikan: Mahasiswa Sistem Informasi FTI — Universitas Sains dan Teknologi Indonesia
+Fokus: Rekayasa Perangkat Lunak, Medical Informatics, & Geospasial GIS`,
+
+            skills: `<span class="text-cyber-purple font-bold">[MATRIX KEAHLIAN]</span>
+• IT: HTML5, Tailwind CSS, Laravel, Android Studio, MySQL
+• GIS: Arc GIS Pro, QGIS, Data Spasial, Topografi Partisipatif
+• Soft Skills: Leadership, Problem Solving, Manajemen Keuangan Organisasi`,
+
+            exp: `<span class="text-cyber-green font-bold">[REKAM JEJAK]</span>
+1. Freelance IT Consultant & System Developer (2024 - Sekarang)
+2. Surveyor & Fasilitator Pemetaan Partisipatif (Maret 2023)
+3. Pengurus Wanapalhi (2021 - 2025): Koord. Lingkungan Hidup, Kadiv RT, Bendahara Umum`,
+
+            contact: `<span class="text-pink-400 font-bold">[TRANSMISI KONTAK]</span>
+Email   : Brosandy828@gmail.com
+GitHub  : https://github.com/SandyGimbal
+LinkedIn: https://www.linkedin.com/in/sandy-gimbal-23434219b
+Status  : Terbuka untuk konsultasi IT, analisis spasial, dan kolaborasi sistem.` ,
+
+            sat: `<span class="text-cyber-cyan font-bold">[TELEMETRI SATELIT]</span>
+GNSS Sentinel-2: CONNECTED (0.5m LiDAR)
+Orbital Path: Equator Sun-Synchronous
+Integrity: 100% OPERATIONAL`
+        };
+
+        function printToTerminal(text, isCommand = false) {
+            const line = document.createElement('div');
+            if (isCommand) {
+                line.className = 'text-white font-bold pt-1';
+                line.innerHTML = `<span class="text-cyber-green">sandy@cli:~$</span> ${text}`;
+            } else {
+                line.className = 'text-slate-300 pl-2 leading-relaxed whitespace-pre-wrap';
+                line.innerHTML = text;
+            }
+            terminalOutput.appendChild(line);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function runCommand(cmd) {
+            cmd = cmd.trim().toLowerCase();
+            playBeep(750, 0.04);
+            printToTerminal(cmd, true);
+
+            if (cmd === 'clear') {
+                terminalOutput.innerHTML = '';
+                return;
+            }
+
+            if (cmd === 'date' || cmd === 'time') {
+                printToTerminal(`<span class="text-cyber-cyan">[SISTEM WAKTU] ${new Date().toLocaleString('id-ID', { timeZoneName: 'short' })}</span>`);
+                return;
+            }
+
+            if (cmd.startsWith('goto ') || cmd === 'home' || cmd === 'beranda' || cmd === 'keahlian') {
+                const targetKey = cmd.startsWith('goto ') ? cmd.replace('goto ', '').trim() : cmd;
+                const pageMap = {
+                    'home': 'hero',
+                    'beranda': 'hero',
+                    'hero': 'hero',
+                    'skills': 'skills',
+                    'keahlian': 'skills',
+                    'experience': 'experience',
+                    'exp': 'experience',
+                    'proyek': 'experience',
+                    'timeline': 'experience',
+                    'terminal': 'terminal',
+                    'contact': 'contact',
+                    'kontak': 'contact'
+                };
+                if (pageMap[targetKey]) {
+                    printToTerminal(`<span class="text-cyber-green">Mengalihkan transmisi ke [//${targetKey.toUpperCase()}]...</span>`);
+                    setTimeout(() => navigateToPage(pageMap[targetKey]), 350);
+                    return;
+                } else {
+                    printToTerminal(`<span class="text-amber-400">Tujuan '${targetKey}' tidak dikenali. Opsi: goto home, goto skills, goto experience, goto contact</span>`);
+                    return;
+                }
+            }
+
+            if (commands[cmd]) {
+                printToTerminal(commands[cmd]);
+            } else if (cmd === '') {
+                // Do nothing
+            } else {
+                printToTerminal(`<span class="text-red-400">Perintah tidak dikenal: '${cmd}'. Ketik 'help' untuk panduan navigasi.</span>`);
+            }
+        }
+
+        if (terminalForm) {
+            terminalForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                runCommand(terminalInput.value);
+                terminalInput.value = '';
+            });
+        }
+
+
+        /* ------------------------------------------------------------------
+         * 8. Copy Email Clipboard Helper
+         * ------------------------------------------------------------------ */
+        function copyEmail() {
+            const email = document.getElementById('email-text').innerText;
+            navigator.clipboard.writeText(email).then(() => {
+                playBeep(1200, 0.1);
+                const label = document.getElementById('copy-label');
+                const btn = document.getElementById('copy-email-btn');
+                label.innerText = 'TERSALIN!';
+                btn.classList.add('bg-cyber-green/20', 'text-cyber-green', 'border-cyber-green');
+                setTimeout(() => {
+                    label.innerText = 'SALIN EMAIL';
+                    btn.classList.remove('bg-cyber-green/20', 'text-cyber-green', 'border-cyber-green');
+                }, 2500);
+            });
+        }
+
+
+        /* ------------------------------------------------------------------
+         * 9. Mobile Hamburger Navigation
+         * ------------------------------------------------------------------ */
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                playBeep(600, 0.03);
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
